@@ -50,7 +50,7 @@ public class DominoeGameBoard {
     //                    ---
     //                   | 5 |
     //                    ---
-    //         EAST       ---        WEST
+    //         WEST       ---        EAST
     //           --- --- | 5 | --- ---
     //          | 0 | 5 | --- | 5 | 2 |
     //           --- --- | 5 | --- ---
@@ -67,6 +67,38 @@ public class DominoeGameBoard {
         SOUTH,
         EAST,
         WEST
+    }
+
+    private int getEastAddIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return mRow.size();
+    }
+
+    private int getWestAddIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getNorthAddIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getSouthAddIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return mColumn.size();
     }
 
     private int getEastIdx() {
@@ -102,11 +134,7 @@ public class DominoeGameBoard {
     }
 
     private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
-        if(idx == 0) {
-            curList.add(idx, dom);
-        } else {
-            curList.add(dom);
-        }
+        curList.add(idx, dom);
     }
 
     private void setSpinner(Dominoe theDominoe, int rowIdx) {
@@ -122,7 +150,7 @@ public class DominoeGameBoard {
 
     public boolean putDominoe(Dominoe theDominoe, EdgeLocation location) {
         boolean success = false;
-        int idx = 0;
+        int idx = 0, addIdx = 0;;
         ArrayList<Dominoe> curList = null;
         Orientation targetOrtn = null;
 
@@ -136,7 +164,7 @@ public class DominoeGameBoard {
             mRow = new ArrayList<Dominoe>();
 
             if (theDominoe.isDouble()) {
-                setSpinner(theDominoe, getWestIdx());
+                setSpinner(theDominoe, getWestAddIdx());
             } else {
                 Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, added domino to row as only domino");
                 theDominoe.setOrientation(Orientation.SIDE1_WEST);
@@ -150,39 +178,43 @@ public class DominoeGameBoard {
         switch(location) {
             case NORTH:
                 idx = getNorthIdx();
+                addIdx = getNorthAddIdx();
                 curList = mColumn;
                 targetOrtn = Orientation.SIDE1_NORTH;
                 break;
 
             case SOUTH:
                 idx = getSouthIdx();
+                addIdx = getSouthAddIdx();
                 curList = mColumn;
                 targetOrtn = Orientation.SIDE1_SOUTH;
                 break;
 
             case EAST:
                 idx = getEastIdx();
+                addIdx = getEastAddIdx();
                 curList = mRow;
                 targetOrtn = Orientation.SIDE1_EAST;
                 break;
 
             case WEST:
                 idx = getWestIdx();
+                addIdx = getWestAddIdx();
                 curList = mRow;
                 targetOrtn = Orientation.SIDE1_WEST;
                 break;
         }
 
-        Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, board not empty, adding dominoe to board area: " + location
+        Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, board not empty, adding domino to board area: " + location
                        + ", index: " + idx);
 
         if(idx != BAD_IDX) {
             if(checkMatch(theDominoe, curList.get(idx), targetOrtn)) {
                 String domList = "";
                 if(mSpinner == null && theDominoe.isDouble()) {
-                    setSpinner(theDominoe, idx);
+                    setSpinner(theDominoe, addIdx);
                 } else {
-                    addDomino(theDominoe, curList, idx);
+                    addDomino(theDominoe, curList, addIdx);
                 }
 
                 success = true;

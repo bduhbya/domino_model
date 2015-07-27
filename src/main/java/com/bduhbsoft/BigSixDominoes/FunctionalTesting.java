@@ -260,17 +260,6 @@ public class FunctionalTesting {
                 messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
             }
             refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl);
-
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//            } catch(InterruptedException e) {
-//                Logging.LogMsg(LogLevel.INFO, TAG, "testAddDominoes, caught exception: " + e);
-//            }
-//            try {
-//                Thread.sleep(DOM_PLAY_SLEEP_TIME_MS);
-//            } catch(InterruptedException ex) {
-//                Thread.currentThread().interrupt();
-//            }
         }
 
         return success;
@@ -293,7 +282,6 @@ public class FunctionalTesting {
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
         
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-//        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner());
 
         return success;
     }
@@ -316,12 +304,11 @@ public class FunctionalTesting {
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-//        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner());
 
         return success;
     }
 
-    public boolean testBoardRowOnlySpinnerNotFirst() {
+    public boolean testBoardRowOnlySpinnerNotFirstEAST() {
         boolean success = true, tempResult = false;
         DominoeGameBoard board = new DominoeGameBoard();
         Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
@@ -329,7 +316,7 @@ public class FunctionalTesting {
         EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
         boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
         ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First";
+        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at East";
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
@@ -344,7 +331,33 @@ public class FunctionalTesting {
         }
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-//        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner());
+
+        return success;
+    }
+
+    public boolean testBoardRowOnlySpinnerNotFirstWEST() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 4), new Dominoe(4, 3), new Dominoe(6, 6)};
+        int expectedTtl[]          = new int[]          {               10,                 9,                15};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
+        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at West";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        resetTestMetrics();
+        //Case: Create a row of dominoes without a spinner, all dominoes succeed
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        if(board.getSpinner() == null) {
+            messages.add("Spinner is null.  Expected spinner to be present.");
+            success = false;
+        }
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
         return success;
     }
@@ -390,7 +403,10 @@ public class FunctionalTesting {
                 mTstClassSuccess = testBoardRowOnlyNoSpinner();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 3) {
-                mTstClassSuccess = testBoardRowOnlySpinnerNotFirst();
+                mTstClassSuccess = testBoardRowOnlySpinnerNotFirstEAST();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 4) {
+                mTstClassSuccess = testBoardRowOnlySpinnerNotFirstWEST();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             }
         }
