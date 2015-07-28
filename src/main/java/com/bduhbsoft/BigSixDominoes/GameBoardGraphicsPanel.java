@@ -87,7 +87,7 @@ class GameBoardGraphicsPanel extends JPanel {
     }
 
     private int[] getRowX(int width) {
-        int rowLen = 0, spinLen = 0;
+        int rowLen = 0, spinLen = 0, idx = 0;
         int[] rowRet = new int[RET_SIZE];
         rowRet[XY_IDX] = INVALID_CORD;
         rowRet[SPN_XY_IDX] = INVALID_CORD;
@@ -98,20 +98,31 @@ class GameBoardGraphicsPanel extends JPanel {
                 if(!curDom.isDouble()) {
                     rowLen += mDomLength;
                 } else {
-                    rowLen += mFaceW;
+                    rowLen += mDomWidth;
+                }
+
+                //Add in the seperation between dominos if there are multiple
+                //and it is not the last one
+                if(idx < (mRow.size()-1) ) {
+                    rowLen += mSeperationW;
                 }
 
                 //If the domino is the spinner, record how far into the length
                 //it occured.  If there is no spinner, then there is no column
                 if(mSpinner != null && curDom.equals(mSpinner)) {
-                    spinLen = rowLen;
+                    spinLen = rowLen - mDomWidth;
+                    if(idx < (mRow.size()-1) ) {
+                        spinLen -= mSeperationW;
+                    }
                 }
+
+                idx++;
             }
 
             //Return the center line of the row's X-coordinate
             rowRet[XY_IDX] = (width / 2) - (rowLen / 2) + mDomWidth_2;
             if(spinLen > 0) {
-                rowRet[SPN_XY_IDX] = (width / 2) - (spinLen / 2) + mDomWidth_2;
+                rowRet[SPN_XY_IDX] = rowRet[XY_IDX] + spinLen + mDomWidth_2;
             }
         }
 
@@ -119,7 +130,7 @@ class GameBoardGraphicsPanel extends JPanel {
     }
 
     private int[] getColY(int height) {
-        int colLen = 0, spinLen = 0;
+        int colLen = 0, spinLen = 0, idx = 0;
         int[] colRet = new int[RET_SIZE];
         colRet[XY_IDX] = INVALID_CORD;
         colRet[SPN_XY_IDX] = INVALID_CORD;
@@ -128,22 +139,33 @@ class GameBoardGraphicsPanel extends JPanel {
             //Doubles are drawn sideways, but the spinner is not drawn sideways with repsect
             //to the column
             for(Dominoe curDom : mCol) {
-                if(!curDom.isDouble() && curDom.equals(mSpinner)) {
+                if(!curDom.isDouble() || curDom.equals(mSpinner)) {
                     colLen += mDomLength;
                 } else {
-                    colLen += mFaceW;
+                    colLen += mDomWidth;
+                }
+
+                //Add in the seperation between dominos if there are multiple
+                //and it is not the last one
+                if(idx < (mCol.size()-1) ) {
+                    colLen += mSeperationW;
                 }
 
                 if(curDom.equals(mSpinner)) {
-                    spinLen = colLen;
+                    spinLen = colLen - mDomLength;
+                    if(idx < (mCol.size()-1) ) {
+                        spinLen -= mSeperationW;
+                    }
                 }
+
+                idx++;
             }
 
             //Return the center line of the Column's y-coordinate
             colRet[XY_IDX] = (height / 2) - (colLen / 2) + mDomWidth_2;
             if(spinLen > 0) {
                 //This SHOULD always happen on the column
-                colRet[SPN_XY_IDX] = (height / 2) - (spinLen / 2) + mDomWidth_2;
+                colRet[SPN_XY_IDX] = colRet[XY_IDX] + spinLen + mDomLength_2;
             }
         }
 
@@ -187,7 +209,7 @@ class GameBoardGraphicsPanel extends JPanel {
         if(colCord[SPN_XY_IDX] != INVALID_CORD) {
             rowStartY = colCord[SPN_XY_IDX];
         } else {
-            rowStartY = (dim.height / 2) - (mFaceW_2);
+            rowStartY = (dim.height / 2) - (mDomWidth_2);
         }
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, spinner/row startY coordinate: " + rowStartY);
@@ -220,7 +242,7 @@ class GameBoardGraphicsPanel extends JPanel {
         }
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, spinner/column startX coordinate: " + colStartX);
-//        drawCol(g, colStartX, colStartY);
+        drawCol(g, colStartX, colStartY);
 
         return;
     }
@@ -259,7 +281,7 @@ class GameBoardGraphicsPanel extends JPanel {
             if(dom.isDouble()) {
                 curX = dblX;
             } else {
-                curX = dblX;
+                curX = regX;
             }
 
             //The spinner is drawn by the row
@@ -269,9 +291,9 @@ class GameBoardGraphicsPanel extends JPanel {
             }
 
             if(dom.isDouble()) {
-                curY += mDomWidth;
+                curY += mDomWidth + mSeperationW;
             } else {
-                curX += mDomLength;
+                curY += mDomLength + mSeperationW;
             }
         }
     }

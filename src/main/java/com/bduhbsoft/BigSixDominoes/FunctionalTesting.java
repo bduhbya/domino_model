@@ -362,6 +362,33 @@ public class FunctionalTesting {
         return success;
     }
 
+    private boolean testBoardColumnNorthOnly() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
+        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Create column with North Domino Only";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        resetTestMetrics();
+        //Case: Create a row of dominoes without a spinner, all dominoes succeed
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        if(board.getSpinner() == null) {
+            messages.add("Spinner is null.  Expected spinner to be present.");
+            success = false;
+        }
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
+    }
+
     private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
 
         mPanel.setBoard(row, col, spinner, points);
@@ -407,6 +434,9 @@ public class FunctionalTesting {
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 4) {
                 mTstClassSuccess = testBoardRowOnlySpinnerNotFirstWEST();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 5) {
+                mTstClassSuccess = testBoardColumnNorthOnly();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             }
         }
