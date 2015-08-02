@@ -25,7 +25,7 @@ public class FunctionalTesting {
     private final static String TAG = "FunctionalTesting";
     private final static String FAILED_MSG = "FAIL";
     private final static String PASSED_MSG = "PASS";
-    final String TEST_BOARD_CLASS = "Dominoe Class Test";
+    private final static String TEST_BOARD_CLASS = "Dominoe Board Class Test";
     private final static int PASS_CTR = 0;
     private final static int FAIL_CTR = 1;
     private final static int PASS_FAIL_CNDS = 2;
@@ -68,6 +68,31 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Test class: \"" + testClass +"\" Overall: " + 
                       (success ? PASSED_MSG : FAILED_MSG) +
                       ", passed: " + passFailCtr[PASS_CTR] + " - failed: " + passFailCtr[FAIL_CTR]);
+    }
+
+    private boolean testAddDominoes(Dominoe[] dom, int[] expectedTtl, boolean[] expectedSuccess,
+                                    DominoeGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages) {
+        boolean success = true, tempResult = false;
+        int curTtl = 0;
+
+        for(int idx = 0; idx < dom.length; idx++) {
+            tempResult = board.putDominoe(dom[idx], addLoc[idx]);
+
+            if(tempResult != expectedSuccess[idx]) {
+                success = false;
+                messages.add("Board " + (tempResult ? "accepcted" : "rejected") + " domino: " +
+                             dom[idx] + ", expected board to " + (expectedSuccess[idx] ? "accecpt" : "reject") + " domino");
+            }
+
+            curTtl = board.getPerimTotal();
+            if(curTtl != expectedTtl[idx]) {
+                success = false;
+                messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
+            }
+            refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl);
+        }
+
+        return success;
     }
 
     public boolean testDominoe() {
@@ -172,7 +197,7 @@ public class FunctionalTesting {
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-        resetTestMetrics();
+
         //Case: put double domino on empty board
         curDom = new Dominoe(dblSide1, dblSide2);
         tempResult = board.putDominoe(curDom, EdgeLocation.NORTH);
@@ -236,32 +261,6 @@ public class FunctionalTesting {
 
         refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal());
 
-//        logSummary(TEST_CLASS, mTstClassSuccess, passFailCtr);
-        return success;
-    }
-
-    private boolean testAddDominoes(Dominoe[] dom, int[] expectedTtl, boolean[] expectedSuccess,
-                                    DominoeGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages) {
-        boolean success = true, tempResult = false;
-        int curTtl = 0;
-
-        for(int idx = 0; idx < dom.length; idx++) {
-            tempResult = board.putDominoe(dom[idx], addLoc[idx]);
-
-            if(tempResult != expectedSuccess[idx]) {
-                success = false;
-                messages.add("Board " + (tempResult ? "accepcted" : "rejected") + " domino: " +
-                             dom[idx] + ", expected board to " + (expectedSuccess[idx] ? "accecpt" : "reject") + " domino");
-            }
-
-            curTtl = board.getPerimTotal();
-            if(curTtl != expectedTtl[idx]) {
-                success = false;
-                messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
-            }
-            refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl);
-        }
-
         return success;
     }
 
@@ -277,8 +276,8 @@ public class FunctionalTesting {
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-        resetTestMetrics();
-        //Case: Create a row of dominoes with a spinner, all dominoe succeed
+
+        //Case: Create a row of dominoes with a spinner, all dominoes succeed
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
         
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
@@ -299,7 +298,6 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        resetTestMetrics();
         //Case: Create a row of dominoes without a spinner, all dominoes succeed
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
@@ -321,8 +319,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        resetTestMetrics();
-        //Case: Create a row of dominoes without a spinner, all dominoes succeed
+        //Case: Create a row of dominoes with the spinner the last dominoe on the east side
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
         if(board.getSpinner() == null) {
@@ -348,8 +345,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        resetTestMetrics();
-        //Case: Create a row of dominoes without a spinner, all dominoes succeed
+        //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
         if(board.getSpinner() == null) {
@@ -375,8 +371,59 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        resetTestMetrics();
-        //Case: Create a row of dominoes without a spinner, all dominoes succeed
+        //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        if(board.getSpinner() == null) {
+            messages.add("Spinner is null.  Expected spinner to be present.");
+            success = false;
+        }
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
+    }
+
+    private boolean testBoardColumnSouthOnly() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
+        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Create column with South Domino Only";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        if(board.getSpinner() == null) {
+            messages.add("Spinner is null.  Expected spinner to be present.");
+            success = false;
+        }
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
+    }
+
+    private boolean testBoardColumnNorthAndSouth() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6),  new Dominoe(1, 6)};
+        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12,                 13};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH, EdgeLocation.NORTH};
+        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true,               true};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Create column with North and South Domino";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        //Case: Test playing the spinner on the North and South side. This requires row dominoes flanking the spinner
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
         if(board.getSpinner() == null) {
@@ -438,6 +485,14 @@ public class FunctionalTesting {
             } else if(mCurGameBoardTest == 5) {
                 mTstClassSuccess = testBoardColumnNorthOnly();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 6) {
+                mTstClassSuccess = testBoardColumnSouthOnly();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 7) {
+                mTstClassSuccess = testBoardColumnNorthAndSouth();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else {
+                logSummary(TEST_BOARD_CLASS, mTstClassSuccess, mPassFailCtr);
             }
         }
     }

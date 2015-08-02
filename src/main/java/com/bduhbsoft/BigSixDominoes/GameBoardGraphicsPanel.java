@@ -278,7 +278,7 @@ class GameBoardGraphicsPanel extends JPanel {
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawCol, starting col at: " + curX + "x" + curY);
         //Col x is the center line, so move half the size based on domoino orientation
         for(Dominoe dom : mCol) {
-            if(dom.isDouble()) {
+            if(dom.isDouble() && !dom.equals(mSpinner)) {
                 curX = dblX;
             } else {
                 curX = regX;
@@ -290,7 +290,7 @@ class GameBoardGraphicsPanel extends JPanel {
                 drawDominoe(g, curX, curY, dom);
             }
 
-            if(dom.isDouble()) {
+            if(dom.isDouble() && !dom.equals(mSpinner)) {
                 curY += mDomWidth + mSeperationW;
             } else {
                 curY += mDomLength + mSeperationW;
