@@ -70,6 +70,23 @@ public class FunctionalTesting {
                       ", passed: " + passFailCtr[PASS_CTR] + " - failed: " + passFailCtr[FAIL_CTR]);
     }
 
+    private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
+
+        mPanel.setBoard(row, col, spinner, points);
+        mPanel.revalidate();
+        mPanel.repaint();
+
+        return;
+    }
+
+    public void resetTestMetrics() {
+        for(int idx = 0; idx < PASS_FAIL_CNDS; idx++) {
+            mPassFailCtr[idx] = 0;
+        }
+
+        mTstClassSuccess = true;
+    }
+
     private boolean testAddDominoes(Dominoe[] dom, int[] expectedTtl, boolean[] expectedSuccess,
                                     DominoeGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages) {
         boolean success = true, tempResult = false;
@@ -95,7 +112,7 @@ public class FunctionalTesting {
         return success;
     }
 
-    public boolean testDominoe() {
+    public boolean testDomino() {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
         Dominoe tempDom;
@@ -436,22 +453,29 @@ public class FunctionalTesting {
         return success;
     }
 
-    private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
+    private boolean testBoardRowAddBadDominoWestWithSpinner() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(4, 2)};
+        int expectedTtl[]          = new int[]          {                6,                 6};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST};
+        boolean expectedSuc[]      = new boolean[]      {             true,             false};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Add bad domino to west side with a spinner";
 
-        mPanel.setBoard(row, col, spinner, points);
-        mPanel.revalidate();
-        mPanel.repaint();
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        return;
+        //Case: Test playing a non-matchng domino to the WEST side with a spinner
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
     }
 
-    public void resetTestMetrics() {
-        for(int idx = 0; idx < PASS_FAIL_CNDS; idx++) {
-            mPassFailCtr[idx] = 0;
-        }
-
-        mTstClassSuccess = true;
-    }
+    //TODO: Negative testing for adding dominoes that do not match the baord location
+    //TODO: or trying to add to the column when the spinner is not flanked
 
     //Handler for clicking next game board test button
     class GameBoardBtnActionListener implements ActionListener {
@@ -491,6 +515,9 @@ public class FunctionalTesting {
             } else if(mCurGameBoardTest == 7) {
                 mTstClassSuccess = testBoardColumnNorthAndSouth();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 8) {
+                mTstClassSuccess = testBoardRowAddBadDominoWestWithSpinner();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else {
                 logSummary(TEST_BOARD_CLASS, mTstClassSuccess, mPassFailCtr);
             }
@@ -520,7 +547,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start");
 
         //Test Dominoe class
-        success = test.testDominoe();
+        success = test.testDomino();
 
         //Test game board
 //        success = test.testGameBoard();

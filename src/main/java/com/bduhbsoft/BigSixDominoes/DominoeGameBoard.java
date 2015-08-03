@@ -33,11 +33,13 @@ public class DominoeGameBoard {
 
     //Internal tracking variables
     private boolean mIsEmpty;
+    private boolean mSpinnerFlanked;
 
     public DominoeGameBoard() {
         mRow = mColumn = null;
         mIsEmpty = true;
         mSpinner = null;
+        mSpinnerFlanked = false;
         Logging.LogMsg(LogLevel.TRACE, TAG, "Constructor");
     }
 
@@ -133,6 +135,15 @@ public class DominoeGameBoard {
         return mColumn.size() - 1;
     }
 
+    private void updatedSpinnerFlanked() {
+        int spinnerRowIdx = getSpinnerRow();
+
+        mSpinnerFlanked =
+            (spinnerRowIdx > 0 && spinnerRowIdx < getEastIdx());
+
+        Logging.LogMsg(LogLevel.DEBUG, TAG, "updatedSpinnerFlanked, spinner is flanked: " + mSpinnerFlanked);
+    }
+
     private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
         curList.add(idx, dom);
     }
@@ -172,6 +183,14 @@ public class DominoeGameBoard {
             }
 
             return success;
+        }
+
+        //If trying to put a domino NORTH or SOUTH without the spinner already flanked
+        //by the row dominos, it fails automatically
+        if(!mSpinnerFlanked && (location == EdgeLocation.NORTH || location == EdgeLocation.SOUTH)) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, rejecting domino to board area: " +
+                           location + ", because spinner flaked is: " + mSpinnerFlanked);
+            return false;
         }
 
         //Setup variables for common processing below.
@@ -234,6 +253,8 @@ public class DominoeGameBoard {
             }
         }
 
+        //Update the status of the spinner
+        updatedSpinnerFlanked();
         return success;
     }
 
@@ -328,7 +349,7 @@ public class DominoeGameBoard {
 
     private int getSpinnerIdx(ArrayList<Dominoe> list) {
         if(list == null || mSpinner == null) {
-            return -1;
+            return BAD_IDX;
         }
 
         return list.indexOf(mSpinner);
