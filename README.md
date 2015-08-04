@@ -7,3 +7,7 @@ Code here is intended to flesh out the basic mechanics of:
 - Tracking the current board total
 - Tracking scores for each player
 - Drawing line and circle score sheets
+- Tracking the bone yard
+- Drawing the basic bone yard
+- Saving a game
+- Having players make a play
