@@ -487,7 +487,49 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        //Case: Test playing a non-matchng domino to the WEST side with a spinner
+        //Case: Test playing a non-matchng domino to the EAST side with a spinner
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
+    }
+
+    private boolean testBoardRowAddBadDominoWestNoSpinner() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 1), new Dominoe(4, 2)};
+        int expectedTtl[]          = new int[]          {                6,                 6};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST};
+        boolean expectedSuc[]      = new boolean[]      {             true,             false};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Add bad domino to west side without a spinner";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        //Case: Test playing a non-matchng domino to the WEST side without a spinner
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+
+        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
+
+        return success;
+    }
+
+    private boolean testBoardRowAddBadDominoEastNoSpinner() {
+        boolean success = true, tempResult = false;
+        DominoeGameBoard board = new DominoeGameBoard();
+        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 1), new Dominoe(4, 2)};
+        int expectedTtl[]          = new int[]          {                6,                 6};
+        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
+        boolean expectedSuc[]      = new boolean[]      {             true,             false};
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_NAME = "DominoeGameBoard: Add bad domino to east side without a spinner";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+        //Case: Test playing a non-matchng domino to the EAST side without a spinner
         success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
@@ -541,6 +583,12 @@ public class FunctionalTesting {
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 9) {
                 mTstClassSuccess = testBoardRowAddBadDominoEastWithSpinner();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 10) {
+                mTstClassSuccess = testBoardRowAddBadDominoWestNoSpinner();
+                mTest.mNextGameBrdTestBtn.setEnabled(true);
+            } else if(mCurGameBoardTest == 11) {
+                mTstClassSuccess = testBoardRowAddBadDominoEastNoSpinner();
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else {
                 logSummary(TEST_BOARD_CLASS, mTstClassSuccess, mPassFailCtr);
