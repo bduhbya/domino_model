@@ -70,9 +70,10 @@ public class FunctionalTesting {
                       ", passed: " + passFailCtr[PASS_CTR] + " - failed: " + passFailCtr[FAIL_CTR]);
     }
 
-    private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
+    private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points, String testName) {
 
         mPanel.setBoard(row, col, spinner, points);
+        mPanel.setTitle(testName);
         mPanel.revalidate();
         mPanel.repaint();
 
@@ -88,9 +89,14 @@ public class FunctionalTesting {
     }
 
     private boolean testAddDominoes(Dominoe[] dom, int[] expectedTtl, boolean[] expectedSuccess,
-                                    DominoeGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages) {
+                                    DominoeGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
         boolean success = true, tempResult = false;
         int curTtl = 0;
+        String title = testName;
+
+        if(title == null) {
+            title = "No Test Name";
+        }
 
         for(int idx = 0; idx < dom.length; idx++) {
             tempResult = board.putDominoe(dom[idx], addLoc[idx]);
@@ -106,8 +112,10 @@ public class FunctionalTesting {
                 success = false;
                 messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
             }
-            refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl);
         }
+
+        title += ": " + (success ? "SUCCESS" : "FAILED");
+        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl, title);
 
         return success;
     }
@@ -211,6 +219,7 @@ public class FunctionalTesting {
         int dblSide1 = 1, dblSide2 = 1;
         int regSide1 = 2, regSide2 = 3;
         final String TEST_NAME = "DominoeGameBoard: Add double to empty board";
+        String title;
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
@@ -276,7 +285,8 @@ public class FunctionalTesting {
 
         mTstClassSuccess = success;
 
-        refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal());
+        title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
+        refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
 
         return success;
     }
@@ -295,7 +305,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Create a row of dominoes with a spinner, all dominoes succeed
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
         
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -316,7 +326,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Create a row of dominoes without a spinner, all dominoes succeed
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -337,7 +347,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Create a row of dominoes with the spinner the last dominoe on the east side
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         if(board.getSpinner() == null) {
             messages.add("Spinner is null.  Expected spinner to be present.");
@@ -363,7 +373,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         if(board.getSpinner() == null) {
             messages.add("Spinner is null.  Expected spinner to be present.");
@@ -389,7 +399,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         if(board.getSpinner() == null) {
             messages.add("Spinner is null.  Expected spinner to be present.");
@@ -415,7 +425,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         if(board.getSpinner() == null) {
             messages.add("Spinner is null.  Expected spinner to be present.");
@@ -441,7 +451,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing the spinner on the North and South side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         if(board.getSpinner() == null) {
             messages.add("Spinner is null.  Expected spinner to be present.");
@@ -467,7 +477,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the WEST side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -488,7 +498,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the EAST side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -509,7 +519,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the WEST side without a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -530,7 +540,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the EAST side without a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -551,7 +561,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the NORTH side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 
@@ -572,7 +582,7 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
         //Case: Test playing a non-matchng domino to the SOUTH side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages);
+        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
         logSuccess(success, TEST_NAME, messages, mPassFailCtr);
 

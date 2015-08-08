@@ -53,12 +53,17 @@ class GameBoardGraphicsPanel extends JPanel {
     private static final int SCORE_X = 25;
     private static final int SCORE_Y = 25;
     private static final int SCORE_SIZE = 20;
+    private static final int TITLE_X = 100;
+    private static final int TITLE_Y = 35;
+    private static final int TITLE_SIZE = 15;
     private static final Color SCORE_COLOR = Color.BLACK;
+    private static final Color TITLE_COLOR = Color.BLUE;
 
     private ArrayList<Dominoe> mRow;
     private ArrayList<Dominoe> mCol;
     private Dominoe mSpinner;
     private int mPoints;
+    private String mTitle;
 
     public GameBoardGraphicsPanel()
     {
@@ -84,6 +89,10 @@ class GameBoardGraphicsPanel extends JPanel {
         mCol = col;
         mSpinner = spinner;
         mPoints = points;
+    }
+
+    public void setTitle(String title) {
+        mTitle = title;
     }
 
     private int[] getRowX(int width) {
@@ -181,6 +190,17 @@ class GameBoardGraphicsPanel extends JPanel {
         g.setColor(curCol);
     }
 
+    private void drawTitle(Graphics g) {
+
+        if(mTitle != null) {
+            Color curCol = g.getColor();
+            g.setColor(TITLE_COLOR);
+            g.setFont(new Font("Monospaced", Font.PLAIN, TITLE_SIZE));
+            g.drawString(mTitle, TITLE_X, TITLE_Y);
+            g.setColor(curCol);
+        }
+    }
+
     private void drawDomBoard(Graphics g) {
         Dimension dim = new Dimension();
         int[] rowCord, colCord;
@@ -216,6 +236,7 @@ class GameBoardGraphicsPanel extends JPanel {
         drawRow(g, rowStartX, rowStartY);
 
         drawPointTotal(g);
+        drawTitle(g);
 
         //If the column size is 1, it only contains the spinner and does not need drawing
         //If the column does not exist, it obviously also, does not need drawing
