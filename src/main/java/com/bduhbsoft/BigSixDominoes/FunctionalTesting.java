@@ -120,6 +120,59 @@ public class FunctionalTesting {
         return success;
     }
 
+    public boolean runAutomatedTests() {
+        boolean success;
+
+        success = testDomino();
+        success = testBoneYard();
+
+        return success;
+    }
+
+    public boolean testBoneYard() {
+        boolean success = true, tstClassSuccess = true;
+        int[] passFailCtr = new int[PASS_FAIL_CNDS];
+        ArrayList<Dominoe> domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
+        DominoBoneyard yard = new DominoBoneyard(domSet);
+        ArrayList<Dominoe> copyList;
+        ArrayList<String> messages = new ArrayList<String>();
+        final String TEST_CLASS = "DominoBoneyard class testing";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoBoneyard Class Tests");
+
+
+        //Case boneyard has dominoes after creation/getYard works correctly
+        if(yard.getYard() == null) {
+            success = false;
+            messages.add("getYard returned null");
+        }
+
+        logSuccess(success, "DominoBoneyard: Init boneyard", messages, passFailCtr);
+
+        //If boneyard is null, no point continuing
+        if(!success) {
+            return success;
+        }
+
+        //Case wash the bone yard
+        tstClassSuccess = success;
+        success = false;
+        messages.clear();
+
+//        @SuppressWarnings("unchecked")
+        copyList = (ArrayList<Dominoe>)(yard.getYard().clone());
+        yard.washYard();
+        for(int idx = 0; idx <  yard.getYard().size(); idx++) {
+            if(!yard.getYard().get(idx).equals(copyList.get(idx))) {
+                success = true;
+            }
+        }
+
+        logSuccess(success, "DominoBoneyard: wash the yard", messages, passFailCtr);
+        return success;
+    }
+
     public boolean testDomino() {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
@@ -817,8 +870,8 @@ public class FunctionalTesting {
 
         Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start");
 
-        //Test Dominoe class
-        success = test.testDomino();
+        //Run all automated tests
+        success = test.runAutomatedTests();
 
         //Test game board
 //        success = test.testGameBoard();
