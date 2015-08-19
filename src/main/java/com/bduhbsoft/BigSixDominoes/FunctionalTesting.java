@@ -132,6 +132,8 @@ public class FunctionalTesting {
     public boolean testBoneYard() {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
+        int yardSize;
+        Dominoe tempDom1, tempDom2;
         ArrayList<Dominoe> domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
         DominoBoneyard yard = new DominoBoneyard(domSet);
         ArrayList<Dominoe> copyList;
@@ -148,6 +150,12 @@ public class FunctionalTesting {
             messages.add("getYard returned null");
         }
 
+        yardSize = yard.getYard().size();
+        if(yardSize <= 0) {
+            success = false;
+            messages.add("getYard returned 0 size list of dominoes");
+        }
+
         logSuccess(success, "DominoBoneyard: Init boneyard", messages, passFailCtr);
 
         //If boneyard is null, no point continuing
@@ -161,11 +169,30 @@ public class FunctionalTesting {
         messages.clear();
 
 //        @SuppressWarnings("unchecked")
+//      TODO: Figure out why this breaks compilation
         copyList = (ArrayList<Dominoe>)(yard.getYard().clone());
         yard.washYard();
-        for(int idx = 0; idx <  yard.getYard().size(); idx++) {
+        Logging.LogMsg(LogLevel.TRACE, "DominoBoneyard: Init boneyard", "copyList |  yard list");
+        for(int idx = 0; idx < yardSize; idx++) {
+            Logging.LogMsg(LogLevel.TRACE, "DominoBoneyard: Init boneyard", "  " + copyList.get(idx) + "    |     " + yard.getYard().get(idx));
             if(!yard.getYard().get(idx).equals(copyList.get(idx))) {
                 success = true;
+            }
+        }
+
+        if(!success) {
+            messages.add("all dominoes still in same position, shuffle failed");
+        }
+
+        //Check for duplicates.  If there is a dup, it indicates a mistake in the shuffle
+        for(int i = 0; i < (yardSize - 1); i++) {
+            for(int j = (i + 1); j < yardSize; j++) {
+                tempDom1 = yard.getYard().get(i);
+                tempDom2 = yard.getYard().get(j);
+                if(tempDom1.equals(tempDom2)) {
+                    success = false;
+                    messages.add("duplicate detected yard[" + i + "]: " + tempDom1 + " <-> yard[" + j + "]: " + tempDom2);
+                }
             }
         }
 
@@ -866,14 +893,17 @@ public class FunctionalTesting {
         FunctionalTesting test = new FunctionalTesting();
         boolean success = false;
 
-        test.initializeGUI();
-
         Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start");
 
         //Run all automated tests
         success = test.runAutomatedTests();
 
+        test.initializeGUI();
+
         //Test game board
+        //TODO: Determine if cmd line or build switch should automate
+        //game baord tests that are currently run manually and visually
+        //inspected.  These tests can be run without visual inspection.
 //        success = test.testGameBoard();
     }
 }

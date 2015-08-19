@@ -38,49 +38,56 @@ public class DominoBoneyard {
         return mDominoes;
     }
 
-    private void putUniqueNum(int newNum, ArrayList<Integer> list) {
-        boolean found = false;
-    
-        for(int curInt: list) {
-            found = (curInt == newNum);
-
-            if(found) break;
+    private int putUniqueNum(int newNum, int[] list, TreeSet<Integer> unique, int idx) {
+        //Tree search should be log(n) to search if the new number is already
+        //in the array.  Uses more space, but runs faster.  Int array access
+        //is obviously expected to be constant
+        if(unique.add(newNum)) {
+            list[idx] = newNum;
+            idx++;
         }
 
-        if(!found) list.add(newNum);
-
-        return;
+        return idx;
     }
 
-    private ArrayList<Integer> getUniqueRandNumList(int min, int max) {
+    private int[] getUniqueRandNumList(int min, int max) {
         Random rand = new Random();
         int randNum;
-        ArrayList<Integer> unqList = new ArrayList<Integer>();
+//        int temp;
+        int[] retList = new int[max + 1];
+        int idx = 0;
+        TreeSet<Integer> unique = new TreeSet<Integer>();
 
-        while(unqList.size() <= max) {
+        while(idx <= max) {
             randNum = rand.nextInt((max - min) + 1) + min;
-            putUniqueNum(randNum, unqList);
+            idx = putUniqueNum(randNum, retList, unique, idx);
 
-            Logging.LogMsg(LogLevel.TRACE, "getUniqueRandNumList", "Randon num: " + randNum + ", new list:");
-            for(int curVal: unqList) {
-                Logging.LogMsg(LogLevel.TRACE, "getUniqueRandNumList", "    " + curVal);
-            }
+            //TODO: Uncomment and add log level checking to loop when log level is implemented from build
+//            Logging.LogMsg(LogLevel.TRACE, "getUniqueRandNumList", "Randon num: " + randNum + ", new list:");
+//            temp = 0;
+//            for(int curVal: retList) {
+//                Logging.LogMsg(LogLevel.TRACE, "getUniqueRandNumList", "    retList[" + temp + "]: " + curVal);
+//                temp++;
+//                if(temp > idx) break;
+//            }
         }
 
-        return unqList;
+        return retList;
     }
 
     public void washYard() {
-        //TODO: Generate unique random numbers between 0 - (n-1) and then
-        //TODO: copy each value to the new index.  I.e. index 0 maps to the
-        //TODO: first random index (i.e. first random number0, index 1 maps to the
-        //TODO: second random index and so o
-        //TODO: second random index and so on
+        //The algorithm works by generating a list of random indexes
+        //The original list is traversed, and element zero is copied
+        //to the new list at position randomIndexes[0].  Element 1 is
+        //copied to the new list at position randomIndexes[1] and so on.
+        //The array of random indexes serves as mapping from the original
+        //list to the new list.  The new list is then saved as the member
+        //list of the object.
         ArrayList<Dominoe> newDoms = new ArrayList<Dominoe>();
-        ArrayList<Integer> newIdxs = getUniqueRandNumList(0, mDominoes.size() - 1);
+        int[] newIdxs = getUniqueRandNumList(0, mDominoes.size() - 1);
 
         for(int idx = 0; idx < mDominoes.size(); idx++) {
-            newDoms.add(mDominoes.get(newIdxs.get(idx)));
+            newDoms.add(mDominoes.get(newIdxs[idx]));
         }
 
         mDominoes = newDoms;
