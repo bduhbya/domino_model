@@ -10,8 +10,8 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 /*
 * Class DominoBoneyard
 *
-* Implements the boneyward which holds the unused dominos
-* The boneyard begins with all of the dominoes when playes
+* Implements the boneyard which holds the unused dominoes
+* The boneyard begins with all of the dominoes when players
 * have not received any.  As such it also washes (or shuffles)
 * the dominoes before the players take them
 *

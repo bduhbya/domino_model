@@ -120,6 +120,10 @@ public class FunctionalTesting {
         return success;
     }
 
+    private boolean checkClassSuccess(boolean classScs, boolean caseScs) {
+        return (classScs && caseScs);
+    }
+
     public boolean runAutomatedTests() {
         boolean success;
 
@@ -164,12 +168,12 @@ public class FunctionalTesting {
         }
 
         //Case wash the bone yard
-        tstClassSuccess = success;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
         success = false;
         messages.clear();
 
-//        @SuppressWarnings("unchecked")
 //      TODO: Figure out why this breaks compilation
+//        @SuppressWarnings("unchecked")
         copyList = (ArrayList<Dominoe>)(yard.getYard().clone());
         yard.washYard();
         Logging.LogMsg(LogLevel.TRACE, "DominoBoneyard: Init boneyard", "copyList |  yard list");
@@ -195,6 +199,26 @@ public class FunctionalTesting {
                 }
             }
         }
+
+        //Check that all original domioes are still present
+        int origIdx = 0;
+        boolean[] found = new boolean[copyList.size()];
+        for(Dominoe origDom: copyList) {
+            for(Dominoe curDom: yard.getYard()) {
+                if(origDom.equals(curDom)) {
+                    found[origIdx] = true;
+                    break;
+                }
+            }
+            if(!found[origIdx]) {
+                success = false;
+                messages.add("domino: " + origDom + ", not in washed list");
+            }
+
+            origIdx++;
+        }
+
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
 
         logSuccess(success, "DominoBoneyard: wash the yard", messages, passFailCtr);
         return success;
@@ -229,7 +253,7 @@ public class FunctionalTesting {
         logSuccess(success, "Dominoe: Create new double", messages, passFailCtr);
 
         //Case create non-double
-        tstClassSuccess = success;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
         success = true;
         messages.clear();
         tempDom = new Dominoe(regSide1, regSide2);
@@ -248,7 +272,7 @@ public class FunctionalTesting {
         logSuccess(success, "Dominoe: Create new non-double", messages, passFailCtr);
 
         //Case set and get orientation
-        tstClassSuccess = success;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
         success = true;
         messages.clear();
         ArrayList<Orientation> testOrtns = new ArrayList<Dominoe.Orientation>();
@@ -270,7 +294,7 @@ public class FunctionalTesting {
         //Case get dominoe set
         tempDom = new Dominoe(dblSide1, dblSide2);
         messages.clear();
-        tstClassSuccess = success;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
         success = true;
         domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
 
@@ -810,64 +834,64 @@ public class FunctionalTesting {
             mTest.mNextGameBrdTestBtn.setEnabled(false);
             if(mCurGameBoardTest == 0) {
                 mTest.resetTestMetrics();
-                mTstClassSuccess = mTest.testBoardFirstDouble();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardFirstDouble());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 1) {
-                mTstClassSuccess = mTest.testBoardRowOnlySpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 2) {
-                mTstClassSuccess = testBoardRowOnlyNoSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlyNoSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 3) {
-                mTstClassSuccess = testBoardRowOnlySpinnerNotFirstEAST();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinnerNotFirstEAST());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 4) {
-                mTstClassSuccess = testBoardRowOnlySpinnerNotFirstWEST();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinnerNotFirstWEST());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 5) {
-                mTstClassSuccess = testBoardColumnNorthOnly();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnNorthOnly());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 6) {
-                mTstClassSuccess = testBoardColumnSouthOnly();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnSouthOnly());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 7) {
-                mTstClassSuccess = testBoardColumnNorthAndSouth();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnNorthAndSouth());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 8) {
-                mTstClassSuccess = testBoardRowAddBadDominoWestWithSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoWestWithSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 9) {
-                mTstClassSuccess = testBoardRowAddBadDominoEastWithSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoEastWithSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 10) {
-                mTstClassSuccess = testBoardRowAddBadDominoWestNoSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoWestNoSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 11) {
-                mTstClassSuccess = testBoardRowAddBadDominoEastNoSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoEastNoSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 12) {
-                mTstClassSuccess = testBoardColumnAddBadDominoNorthWithNonFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithNonFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 13) {
-                mTstClassSuccess = testBoardColumnAddBadDominoSouthWithNonFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithNonFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 14) {
-                mTstClassSuccess = testBoardColumnAddBadDominoNorthWithWestHalfFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithWestHalfFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 15) {
-                mTstClassSuccess = testBoardColumnAddBadDominoSouthWithWestHalfFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithWestHalfFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 16) {
-                mTstClassSuccess = testBoardColumnAddBadDominoNorthWithEastHalfFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithEastHalfFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 17) {
-                mTstClassSuccess = testBoardColumnAddBadDominoSouthWithEastHalfFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithEastHalfFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 18) {
-                mTstClassSuccess = testBoardColumnAddBadDominoNorthWithFullFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithFullFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else if(mCurGameBoardTest == 19) {
-                mTstClassSuccess = testBoardColumnAddBadDominoSouthWithFullFlankedSpinner();
+                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithFullFlankedSpinner());
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else {
                 logSummary(TEST_BOARD_CLASS, mTstClassSuccess, mPassFailCtr);
