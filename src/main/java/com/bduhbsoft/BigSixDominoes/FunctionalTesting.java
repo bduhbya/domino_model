@@ -136,10 +136,10 @@ public class FunctionalTesting {
     public boolean testBoneYard() {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
-        int yardSize;
+        int yardSize, newYardSize;
         Dominoe tempDom1, tempDom2;
         ArrayList<Dominoe> domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
-        DominoBoneyard yard = new DominoBoneyard(domSet);
+        DominoBoneyard yard = new DominoBoneyard();
         ArrayList<Dominoe> copyList;
         ArrayList<String> messages = new ArrayList<String>();
         final String TEST_CLASS = "DominoBoneyard class testing";
@@ -147,22 +147,35 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoBoneyard Class Tests");
 
-
-        //Case boneyard has dominoes after creation/getYard works correctly
-        if(yard.getYard() == null) {
+        //Case boneyard is empty after creation and returns zero size
+        if(yard.getYardSize() != 0) {
             success = false;
-            messages.add("getYard returned null");
+            messages.add("getYardSize returned non-zero size after empty init: " + yard.getYardSize());
         }
 
-        yardSize = yard.getYard().size();
+        tempDom1 = yard.removeDomino();
+        if(tempDom1 != null) {
+            success = false;
+            messages.add("removeDomino returned non-null domino when empty: " + tempDom1);
+        }
+
+        logSuccess(success, "DominoBoneyard: New empty boneyard", messages, passFailCtr);
+
+        //Case set yard populates the bone yard
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        success = true;
+        messages.clear();
+
+        yard.setYard(domSet);
+        yardSize = yard.getYardSize();
         if(yardSize <= 0) {
             success = false;
-            messages.add("getYard returned 0 size list of dominoes");
+            messages.add("setYard() failed, getYardSize returned bad value: " + yardSize);
         }
 
         logSuccess(success, "DominoBoneyard: Init boneyard", messages, passFailCtr);
 
-        //If boneyard is null, no point continuing
+        //If boneyard is empty, no point continuing
         if(!success) {
             return success;
         }
@@ -218,9 +231,28 @@ public class FunctionalTesting {
             origIdx++;
         }
 
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
-
         logSuccess(success, "DominoBoneyard: wash the yard", messages, passFailCtr);
+
+        //Case remove a domino from the yard
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        success = true;
+        messages.clear();
+
+        tempDom1 = yard.removeDomino();
+        newYardSize = yard.getYardSize();
+        if(newYardSize != (yardSize - 1)) {
+            success = false;
+            messages.add("removeDomino removed one domino, expected size incorrect.  New size: " + newYardSize + ", prev size" + yardSize);
+        }
+
+        if(tempDom1 == null) {
+            success = false;
+            messages.add("removeDomino returned null, expected valid object");
+        }
+
+        logSuccess(success, "DominoBoneyard: remove domino from the yard", messages, passFailCtr);
+
+        logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
         return success;
     }
 

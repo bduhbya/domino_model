@@ -21,21 +21,35 @@ public class DominoBoneyard {
 
     private ArrayList<Dominoe> mDominoes;
 
-    public DominoBoneyard(ArrayList<Dominoe> dominoes) {
+    public DominoBoneyard() {
+        return;
+    }
+
+    //Sets bone yard contents
+    public void setYard(ArrayList<Dominoe> dominoes) {
         mDominoes = dominoes;
     }
 
-    public Dominoe getDomino(int position) {
-        if(position < mDominoes.size() ||
-           position >= 0                 ) {
-            return mDominoes.remove(position);
+    //Removes domino from the board
+    public Dominoe removeDomino() {
+        if(mDominoes != null && mDominoes.size() > 0) {
+            return mDominoes.remove(0);
         }
 
         return null;
     }
 
+    //Utility function fot testing
     public ArrayList<Dominoe> getYard() {
         return mDominoes;
+    }
+
+    //Gets number of dominoes in the yard
+    public int getYardSize() {
+        if(mDominoes == null) {
+            return 0;
+        }
+        return mDominoes.size();
     }
 
     private int putUniqueNum(int newNum, int[] list, TreeSet<Integer> unique, int idx) {
