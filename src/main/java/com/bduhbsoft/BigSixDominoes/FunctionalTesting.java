@@ -46,6 +46,11 @@ public class FunctionalTesting {
         mPassFailCtr = new int[PASS_FAIL_CNDS];
     }
 
+    public interface iGameBoardTest { 
+        //boolean initTest();
+        boolean runTest(FunctionalTesting test);
+    }
+
     public static void logSuccess(boolean success, String testCase, ArrayList<String> messages, int[] passFailCtr) {
         String passFail;
 
@@ -346,510 +351,347 @@ public class FunctionalTesting {
         return success;
     }
 
-    public boolean testBoardFirstDouble() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        ArrayList<Dominoe> row = null, col = null;
-        Dominoe curDom;
-        ArrayList<String> messages = new ArrayList<String>();
-        int dblSide1 = 1, dblSide2 = 1;
-        int regSide1 = 2, regSide2 = 3;
-        final String TEST_NAME = "DominoeGameBoard: Add double to empty board";
-        String title;
+    public static iGameBoardTest[] mGameBoardTests = {
 
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            ArrayList<Dominoe> row = null, col = null;
+            Dominoe curDom;
+            ArrayList<String> messages = new ArrayList<String>();
+            int dblSide1 = 1, dblSide2 = 1;
+            int regSide1 = 2, regSide2 = 3;
+            final String TEST_NAME = "DominoeGameBoard: Add double to empty board";
+            String title;
 
-        //Case: put double domino on empty board
-        curDom = new Dominoe(dblSide1, dblSide2);
-        tempResult = board.putDominoe(curDom, EdgeLocation.NORTH);
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
-        //If board says it's empty, the test is failed or if board failed to put domino on empty board
-        if(!tempResult) {
-            messages.add("Failed to add domino to empty board");
-            success = false;
-        }
+            //Case: put double domino on empty board
+            curDom = new Dominoe(dblSide1, dblSide2);
+            tempResult = board.putDominoe(curDom, EdgeLocation.NORTH);
 
-        if(board.isEmpty()) {
-            messages.add("Board shows empty after adding domino");
-            success = false;
-        }
-
-        //Check that the row and column have the dominoe and the spinner is correctly located
-        row = board.getRow();
-        col = board.getColumn();
-        if(row == null) {
-            messages.add("Row is null after adding first domino");
-            success = false;
-        }
-
-        if(col == null) {
-            messages.add("Column is null after adding first domino");
-            success = false;
-        }
-
-        if(row != null && col != null) {
-            if(!curDom.equals(row.get(0))) {
+            //If board says it's empty, the test is failed or if board failed to put domino on empty board
+            if(!tempResult) {
+                messages.add("Failed to add domino to empty board");
                 success = false;
-                messages.add("Domino added to board doens't match row domino, expected: " + curDom + " - actual: " + row.get(0));
             }
 
-            if(!curDom.equals(col.get(0))) {
+            if(board.isEmpty()) {
+                messages.add("Board shows empty after adding domino");
                 success = false;
-                messages.add("Domino added to board doens't match col domino, expected: " + curDom + " - actual: " + col.get(0));
             }
-        }
-
-        //Check spinner index
-        if(board.getSpinnerRow() != 0) {
-            success = false;
-            messages.add("Spinner row incorrect.  Expected: 0 - Found: " + board.getSpinnerRow());
-        }
-
-        if(board.getSpinnerColumn() != 0) {
-            success = false;
-            messages.add("Spinner column incorrect.  Expected: 0 - Found: " + board.getSpinnerColumn());
-        }
-
-        //Check board total
-        if(board.getPerimTotal() != (dblSide1 + dblSide2)) {
-            success = false;
-            messages.add("Perimeter total incorrect.  Expected: " + (dblSide1 + dblSide2) + " - Found: " + board.getPerimTotal());
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        mTstClassSuccess = success;
-
-        title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
-        refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
-
-        return success;
-    }
-
-    public boolean testBoardRowOnlySpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(3, 2), new Dominoe(6, 5), new Dominoe(2, 1)};
-        int expectedTtl[]          = new int[]          {               12,                15,                14,                 7,                 6};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              true,              true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Create a row of dominoes with a spinner, all dominoes succeed
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-        
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    public boolean testBoardRowOnlyNoSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 4)};
-        int expectedTtl[]          = new int[]          {                5,                 8,                10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create Single Row With NO Spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Create a row of dominoes without a spinner, all dominoes succeed
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    public boolean testBoardRowOnlySpinnerNotFirstEAST() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
-        int expectedTtl[]          = new int[]          {                5,                 8,                10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at East";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Create a row of dominoes with the spinner the last dominoe on the east side
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        if(board.getSpinner() == null) {
-            messages.add("Spinner is null.  Expected spinner to be present.");
-            success = false;
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    public boolean testBoardRowOnlySpinnerNotFirstWEST() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 4), new Dominoe(4, 3), new Dominoe(6, 6)};
-        int expectedTtl[]          = new int[]          {               10,                 9,                15};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at West";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        if(board.getSpinner() == null) {
-            messages.add("Spinner is null.  Expected spinner to be present.");
-            success = false;
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnNorthOnly() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
-        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create column with North Domino Only";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        if(board.getSpinner() == null) {
-            messages.add("Spinner is null.  Expected spinner to be present.");
-            success = false;
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnSouthOnly() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
-        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create column with South Domino Only";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        if(board.getSpinner() == null) {
-            messages.add("Spinner is null.  Expected spinner to be present.");
-            success = false;
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnNorthAndSouth() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6),  new Dominoe(1, 6)};
-        int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12,                 13};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true,               true};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Create column with North and South Domino";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing the spinner on the North and South side. This requires row dominoes flanking the spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        if(board.getSpinner() == null) {
-            messages.add("Spinner is null.  Expected spinner to be present.");
-            success = false;
-        }
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardRowAddBadDominoWestWithSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(4, 2)};
-        int expectedTtl[]          = new int[]          {                6,                 6};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST};
-        boolean expectedSuc[]      = new boolean[]      {             true,             false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to west side with a spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the WEST side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardRowAddBadDominoEastWithSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(4, 2)};
-        int expectedTtl[]          = new int[]          {                6,                 6};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
-        boolean expectedSuc[]      = new boolean[]      {             true,             false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to east side with a spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the EAST side with a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardRowAddBadDominoWestNoSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 1), new Dominoe(4, 2)};
-        int expectedTtl[]          = new int[]          {                6,                 6};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST};
-        boolean expectedSuc[]      = new boolean[]      {             true,             false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to west side without a spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the WEST side without a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardRowAddBadDominoEastNoSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 1), new Dominoe(4, 2)};
-        int expectedTtl[]          = new int[]          {                6,                 6};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
-        boolean expectedSuc[]      = new boolean[]      {             true,             false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to east side without a spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the EAST side without a spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoNorthWithNonFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5),  new Dominoe(5, 0)};
-        int expectedTtl[]          = new int[]          {               10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a non-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the NORTH side with a non-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoSouthWithNonFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5),  new Dominoe(5, 0)};
-        int expectedTtl[]          = new int[]          {               10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.SOUTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a non-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the SOUTH side with a non-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoNorthWithWestHalfFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a west half-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the NORTH side with a west half-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoSouthWithWestHalfFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.SOUTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a west half-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the SOUTH side with a west half-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoNorthWithEastHalfFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a east half-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the NORTH side with a east half-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoSouthWithEastHalfFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 10};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.SOUTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a east half-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a matchng domino to the SOUTH side with a east half-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoNorthWithFullFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a full-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the NORTH side with a full-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
-
-    private boolean testBoardColumnAddBadDominoSouthWithFullFlankedSpinner() {
-        boolean success = true, tempResult = false;
-        DominoeGameBoard board = new DominoeGameBoard();
-        Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
-        int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
-        EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
-        boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
-        ArrayList<String> messages = new ArrayList<String>();
-        final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a full-flanked spinner";
-
-        Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
-        //Case: Test playing a non-matchng domino to the SOUTH side with a full-flanked spinner
-        success = testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
-
-        logSuccess(success, TEST_NAME, messages, mPassFailCtr);
-
-        return success;
-    }
+
+            //Check that the row and column have the dominoe and the spinner is correctly located
+            row = board.getRow();
+            col = board.getColumn();
+            if(row == null) {
+                messages.add("Row is null after adding first domino");
+                success = false;
+            }
+
+            if(col == null) {
+                messages.add("Column is null after adding first domino");
+                success = false;
+            }
+
+            if(row != null && col != null) {
+                if(!curDom.equals(row.get(0))) {
+                    success = false;
+                    messages.add("Domino added to board doens't match row domino, expected: " + curDom + " - actual: " + row.get(0));
+                }
+
+                if(!curDom.equals(col.get(0))) {
+                    success = false;
+                    messages.add("Domino added to board doens't match col domino, expected: " + curDom + " - actual: " + col.get(0));
+                }
+            }
+
+            //Check spinner index
+            if(board.getSpinnerRow() != 0) {
+                success = false;
+                messages.add("Spinner row incorrect.  Expected: 0 - Found: " + board.getSpinnerRow());
+            }
+
+            if(board.getSpinnerColumn() != 0) {
+                success = false;
+                messages.add("Spinner column incorrect.  Expected: 0 - Found: " + board.getSpinnerColumn());
+            }
+
+            //Check board total
+            if(board.getPerimTotal() != (dblSide1 + dblSide2)) {
+                success = false;
+                messages.add("Perimeter total incorrect.  Expected: " + (dblSide1 + dblSide2) + " - Found: " + board.getPerimTotal());
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
+            test.refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(3, 2), new Dominoe(6, 5), new Dominoe(2, 1)};
+            int expectedTtl[]          = new int[]          {               12,                15,                14,                 7,                 6};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Create a row of dominoes with a spinner, all dominoes succeed
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+            
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 4)};
+            int expectedTtl[]          = new int[]          {                5,                 8,                10};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With NO Spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Create a row of dominoes without a spinner, all dominoes succeed
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
+            int expectedTtl[]          = new int[]          {                5,                 8,                10};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at East";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Create a row of dominoes with the spinner the last dominoe on the east side
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(board.getSpinner() == null) {
+                messages.add("Spinner is null.  Expected spinner to be present.");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
+            int expectedTtl[]          = new int[]          {                5,                 8,                10};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at East";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Create a row of dominoes with the spinner the last dominoe on the east side
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(board.getSpinner() == null) {
+                messages.add("Spinner is null.  Expected spinner to be present.");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 4), new Dominoe(4, 3), new Dominoe(6, 6)};
+            int expectedTtl[]          = new int[]          {               10,                 9,                15};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at West";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(board.getSpinner() == null) {
+                messages.add("Spinner is null.  Expected spinner to be present.");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+            int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create column with North Domino Only";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(board.getSpinner() == null) {
+                messages.add("Spinner is null.  Expected spinner to be present.");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+            int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Create column with South Domino Only";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(board.getSpinner() == null) {
+                messages.add("Spinner is null.  Expected spinner to be present.");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
+            int expectedTtl[]          = new int[]          {               10,                10,                 10};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a east half-flanked spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing a matchng domino to the NORTH side with a east half-flanked spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
+            int expectedTtl[]          = new int[]          {               10,                10,                 10};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.SOUTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a east half-flanked spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing a matchng domino to the SOUTH side with a east half-flanked spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
+            int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Add bad domino to north side with a full-flanked spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing a non-matchng domino to the NORTH side with a full-flanked spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
+            int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Add bad domino to south side with a full-flanked spinner";
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing a non-matchng domino to the SOUTH side with a full-flanked spinner
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }}
+    };
+
+
 
     //Handler for clicking next game board test button
     class GameBoardBtnActionListener implements ActionListener {
@@ -863,70 +705,16 @@ public class FunctionalTesting {
         public void actionPerformed(ActionEvent e) { 
             mTest.mCurGameBoardTest++;
 
-            mTest.mNextGameBrdTestBtn.setEnabled(false);
             if(mCurGameBoardTest == 0) {
                 mTest.resetTestMetrics();
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardFirstDouble());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 1) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 2) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlyNoSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 3) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinnerNotFirstEAST());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 4) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowOnlySpinnerNotFirstWEST());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 5) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnNorthOnly());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 6) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnSouthOnly());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 7) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnNorthAndSouth());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 8) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoWestWithSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 9) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoEastWithSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 10) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoWestNoSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 11) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardRowAddBadDominoEastNoSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 12) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithNonFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 13) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithNonFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 14) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithWestHalfFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 15) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithWestHalfFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 16) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithEastHalfFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 17) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithEastHalfFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 18) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoNorthWithFullFlankedSpinner());
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else if(mCurGameBoardTest == 19) {
-                mTstClassSuccess = checkClassSuccess(mTstClassSuccess, mTest.testBoardColumnAddBadDominoSouthWithFullFlankedSpinner());
+            }
+
+            mTest.mNextGameBrdTestBtn.setEnabled(false);
+            if(mCurGameBoardTest < FunctionalTesting.mGameBoardTests.length) {
+                mTest.mTstClassSuccess = checkClassSuccess(mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurGameBoardTest].runTest(mTest));
                 mTest.mNextGameBrdTestBtn.setEnabled(true);
             } else {
-                logSummary(TEST_BOARD_CLASS, mTstClassSuccess, mPassFailCtr);
+                logSummary(TEST_BOARD_CLASS, mTest.mTstClassSuccess, mTest.mPassFailCtr);
             }
         }
     }
