@@ -507,10 +507,10 @@ public class FunctionalTesting {
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
-            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.EAST, EdgeLocation.EAST, EdgeLocation.WEST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
             ArrayList<String> messages = new ArrayList<String>();
-            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at East";
+            final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at West First Domino Played EAST";
 
             Logging.LogMsg(LogLevel.INFO, TAG, "");
             Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);

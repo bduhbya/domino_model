@@ -159,6 +159,22 @@ public class DominoeGameBoard {
         addDomino(theDominoe, mRow, rowIdx);
     }
 
+    //TODO: Add "commit" function to finalize domino placement
+    //TODO: Add "removeLast" to remove last domino added to board if not "committed"
+    //TODO: Update putDominoe function to reject domino if previous one was not committed
+
+    /*
+     * Attempts to add a domino to the game board.  Returns true on succesfull result.
+     * Game rules, board type and current configuration determine if adding the domino
+     * is valid.
+     * <p>
+     * 
+     * @param Dominoe     : The specific domino to add to the game board
+     * @param EdgeLocation: Edge (or side) of the current configuration to add
+     *                      the domino.  Note that when the board is empty, the specified
+     *                      edge location will effect the domino orientation.
+     * @return boolean    : True if the domino was added.  False if the domino could not be added
+     */
     public boolean putDominoe(Dominoe theDominoe, EdgeLocation location) {
         boolean success = false;
         int idx = 0, addIdx = 0;;
@@ -178,7 +194,8 @@ public class DominoeGameBoard {
                 setSpinner(theDominoe, getWestAddIdx());
             } else {
                 Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, added domino to row as only domino");
-                theDominoe.setOrientation(Orientation.SIDE1_WEST);
+                targetOrtn = (location == EdgeLocation.EAST) ? Orientation.SIDE1_EAST : Orientation.SIDE1_WEST;
+                theDominoe.setOrientation(targetOrtn);
                 mRow.add(theDominoe);
             }
 
