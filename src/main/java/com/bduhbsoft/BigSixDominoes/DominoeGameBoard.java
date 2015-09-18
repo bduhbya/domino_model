@@ -32,14 +32,20 @@ public class DominoeGameBoard {
     private Dominoe mSpinner;
 
     //Internal tracking variables
-    private boolean mIsEmpty;
-    private boolean mSpinnerFlanked;
+    private boolean            mIsEmpty;
+    private boolean            mSpinnerFlanked;
+    //If the last domino was not committed or removed, the board is not open to accept
+    //another domino
+    private boolean            mBoardOpen;
+    private int                mLastDomPos;
+    private ArrayList<Dominoe> mLastDomLoc;
 
     public DominoeGameBoard() {
         mRow = mColumn = null;
         mIsEmpty = true;
         mSpinner = null;
         mSpinnerFlanked = false;
+        mBoardOpen = true;
         Logging.LogMsg(LogLevel.TRACE, TAG, "Constructor");
     }
 
@@ -145,6 +151,9 @@ public class DominoeGameBoard {
     }
 
     private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
+        mBoardOpen = false;
+        mLastDomPos = idx;
+        mLastDomLoc = curList;
         curList.add(idx, dom);
     }
 
@@ -152,22 +161,29 @@ public class DominoeGameBoard {
         Logging.LogMsg(LogLevel.TRACE, TAG, "setSpinner first double played");
         theDominoe.setOrientation(Orientation.SIDE1_NORTH);
         mColumn = new ArrayList<Dominoe>();
-        mColumn.add(theDominoe);
+        addDomino(theDominoe, mColumn, 0);
         mSpinner = theDominoe;
 
         //Add to row
         addDomino(theDominoe, mRow, rowIdx);
     }
 
-    //TODO: Add "commit" function to finalize domino placement
     //TODO: Add "removeLast" to remove last domino added to board if not "committed"
     //TODO: Update putDominoe function to reject domino if previous one was not committed
 
-    /*
-     * Attempts to add a domino to the game board.  Returns true on succesfull result.
-     * Game rules, board type and current configuration determine if adding the domino
-     * is valid.
+    /**
+     * Commits the last domino played on the board.  Cannot be undone.
+     */
+    public void commitBoardState() {
+        mBoardOpen = true;
+    }
+
+    /**
+     * Attempts to add a domino to the game board, but does not commit the domino.
      * <p>
+     * Returns true on successful result.
+     * The game rules, board type and current configuration determine if adding the domino
+     * is valid.
      * 
      * @param Dominoe     : The specific domino to add to the game board
      * @param EdgeLocation: Edge (or side) of the current configuration to add
@@ -182,6 +198,11 @@ public class DominoeGameBoard {
         Orientation targetOrtn = null;
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe");
+        if(!mBoardOpen) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, board not open because last domino not committed or removed");
+            return success;
+        }
+
         //Board is empty, set east and west pointers at least.  If double, then
         //also process as the first double.  If empty, board location is implied
         if (mIsEmpty) {
@@ -196,14 +217,14 @@ public class DominoeGameBoard {
                 Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, added domino to row as only domino");
                 targetOrtn = (location == EdgeLocation.EAST) ? Orientation.SIDE1_EAST : Orientation.SIDE1_WEST;
                 theDominoe.setOrientation(targetOrtn);
-                mRow.add(theDominoe);
+                addDomino(theDominoe, mRow, 0);
             }
 
             return success;
         }
 
         //If trying to put a domino NORTH or SOUTH without the spinner already flanked
-        //by the row dominos, it fails automatically
+        //by the row dominoes, it fails automatically
         if(!mSpinnerFlanked && (location == EdgeLocation.NORTH || location == EdgeLocation.SOUTH)) {
             Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, rejecting domino to board area: " +
                            location + ", because spinner flaked is: " + mSpinnerFlanked);

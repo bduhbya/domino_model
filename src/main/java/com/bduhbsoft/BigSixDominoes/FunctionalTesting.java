@@ -42,7 +42,7 @@ public class FunctionalTesting {
     private boolean mTstClassSuccess;
 
     public FunctionalTesting() {
-        mCurGameBoardTest = -1;
+        mCurGameBoardTest = 0;
         mPassFailCtr = new int[PASS_FAIL_CNDS];
     }
 
@@ -117,6 +117,7 @@ public class FunctionalTesting {
                 success = false;
                 messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
             }
+            board.commitBoardState();
         }
 
         title += ": " + (success ? "SUCCESS" : "FAILED");
@@ -688,6 +689,42 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoeGameBoard board = new DominoeGameBoard();
+            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(3, 0)};
+            int expectedTtl[]          = new int[]          {                6,                 6};
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
+            boolean expectedSuc[]      = new boolean[]      {             true,              true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Add domino without committing last domino";
+            Dominoe tempDom;
+            EdgeLocation tempLoc;
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            //Case: Test playing a domino when last domino was not committed to the board
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            tempDom = new Dominoe(2, 3);
+            tempLoc = EdgeLocation.WEST;
+            if(success && board.putDominoe(tempDom, tempLoc)) {
+                tempDom = new Dominoe(2, 4);
+                if(board.putDominoe(tempDom, tempLoc)) {
+                    success = false;
+                    messages.add("Able to add domino: " + tempDom + ", to edge: " + tempLoc + ", expected add to fail");
+                }
+            } else {
+                messages.add("Failed to add domino: " + tempDom + ". to edge: " + tempLoc + ", expected add to succeed");
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
         }}
     };
 
@@ -703,17 +740,16 @@ public class FunctionalTesting {
 
         @Override
         public void actionPerformed(ActionEvent e) { 
-            mTest.mCurGameBoardTest++;
 
-            if(mCurGameBoardTest == 0) {
+            if(mTest.mCurGameBoardTest == 0) {
                 mTest.resetTestMetrics();
             }
 
-            mTest.mNextGameBrdTestBtn.setEnabled(false);
-            if(mCurGameBoardTest < FunctionalTesting.mGameBoardTests.length) {
-                mTest.mTstClassSuccess = checkClassSuccess(mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurGameBoardTest].runTest(mTest));
-                mTest.mNextGameBrdTestBtn.setEnabled(true);
-            } else {
+            mTest.mTstClassSuccess = checkClassSuccess(mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurGameBoardTest].runTest(mTest));
+            mTest.mCurGameBoardTest++;
+
+            if(mTest.mCurGameBoardTest == FunctionalTesting.mGameBoardTests.length) {
+                mTest.mNextGameBrdTestBtn.setEnabled(false);
                 logSummary(TEST_BOARD_CLASS, mTest.mTstClassSuccess, mTest.mPassFailCtr);
             }
         }
