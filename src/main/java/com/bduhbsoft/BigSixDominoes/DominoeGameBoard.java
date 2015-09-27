@@ -78,17 +78,46 @@ public class DominoeGameBoard {
         WEST
     }
 
+    void printList(ArrayList<Dominoe> list) {
+        for(Dominoe dom : list) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "    " + dom);
+        }
+    }
+
     /**
-    * Removes uncommitted domino from the game board
+    * Removes last uncommitted domino from the game board
     */
     public void removeLast() {
         if(!mBoardOpen) {
             if(mRow != null) {
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, mLostDom: " + mLastDom + ", row size before: " + mRow.size());
                 mRow.remove(mLastDom);
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, tried to remove domino, row size: " + mRow.size() + ", contents:");
+                printList(mRow);
             }
             if(mColumn != null) {
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, mLostDom: " + mLastDom + ", col size before: " + mRow.size());
                 mColumn.remove(mLastDom);
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, tried to remove domino, col size: " + mRow.size() + ", contents:");
+                printList(mColumn);
             }
+
+            if(mSpinner == mLastDom) {
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, last matched spinner, spinner set null");
+                mSpinner = null;
+            }
+
+            //If row or column is empty, destroy them for future processing
+            if(mRow.isEmpty()) {
+                mRow = null;
+            }
+            if(mColumn.isEmpty()) {
+                mColumn = null;
+            }
+
+            mIsEmpty = (mRow == null && mColumn == null);
+            Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, row is: " + ((mRow == null) ? "NULL" : "NOT NULL") +
+                ", column is: " + ((mColumn == null) ? "NULL" : "NOT NULL") + ", mIsEmpty: " + mIsEmpty);
         }
     }
 
@@ -259,6 +288,7 @@ public class DominoeGameBoard {
         return getSpinnerIdx(mRow);
     }
 
+    //TODO: Consider making private
     public int getSpinnerColumn() {
         return getSpinnerIdx(mColumn);
     }
@@ -272,6 +302,11 @@ public class DominoeGameBoard {
         return mIsEmpty;
     }
 
+    /**
+     * Returns board perimeter value
+     * <p>
+     * @return int : Current perimeter value
+     */
     public int getPerimTotal() {
         int eastVal = 0, westVal = 0, northVal = 0, southVal = 0;
         int eastIdx, westIdx, northIdx, southIdx;

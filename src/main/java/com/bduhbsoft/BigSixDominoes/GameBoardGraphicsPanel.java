@@ -213,6 +213,9 @@ class GameBoardGraphicsPanel extends JPanel {
         rowCord = getRowX(dim.width);
         colCord = getColY(dim.height);
 
+        drawPointTotal(g);
+        drawTitle(g);
+
         //The row starts at row x, spinner y
         //The column starts at column y and spinner
         //If the column came back empty, just center on the Y value
@@ -234,9 +237,6 @@ class GameBoardGraphicsPanel extends JPanel {
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, spinner/row startY coordinate: " + rowStartY);
         drawRow(g, rowStartX, rowStartY);
-
-        drawPointTotal(g);
-        drawTitle(g);
 
         //If the column size is 1, it only contains the spinner and does not need drawing
         //If the column does not exist, it obviously also, does not need drawing

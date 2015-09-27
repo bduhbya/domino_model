@@ -725,6 +725,38 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
+        }},
+
+        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            DominoeGameBoard board = new DominoeGameBoard();
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoeGameBoard: Remove spinner as first played domino";
+            Dominoe tempDom;
+            EdgeLocation tempLoc;
+
+            Logging.LogMsg(LogLevel.INFO, TAG, "");
+            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
+
+            tempDom = new Dominoe(3, 3);
+            tempLoc = EdgeLocation.WEST;
+            if(board.putDominoe(tempDom, tempLoc)) {
+                //Expect board to be empty
+                board.removeLast();
+                ArrayList<Dominoe> row = board.getRow();
+                ArrayList<Dominoe> col = board.getColumn();
+                Dominoe spinner = board.getSpinner();
+                if(row != null || col != null || spinner != null) {
+                    success = false;
+                    messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
+                        ", col: " + ((col == null) ? "NULL" : "NOT NULL") + ", spinner: " + ((spinner == null) ? "NULL" : "NOT NULL"));
+                }
+                test.refreshDisplay(row, col, spinner, board.getPerimTotal(), TEST_NAME);
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
         }}
     };
 
