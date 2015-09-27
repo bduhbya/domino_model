@@ -37,8 +37,9 @@ public class DominoeGameBoard {
     //If the last domino was not committed or removed, the board is not open to accept
     //another domino
     private boolean            mBoardOpen;
-    private int                mLastDomPos;
-    private ArrayList<Dominoe> mLastDomLoc;
+    private Dominoe            mLastDom;
+
+    //**************************Public Interface*****************************
 
     public DominoeGameBoard() {
         mRow = mColumn = null;
@@ -77,105 +78,26 @@ public class DominoeGameBoard {
         WEST
     }
 
-    private int getEastAddIdx() {
-        if(mRow == null) {
-            return BAD_IDX;
+    /**
+    * Removes uncommitted domino from the game board
+    */
+    public void removeLast() {
+        if(!mBoardOpen) {
+            if(mRow != null) {
+                mRow.remove(mLastDom);
+            }
+            if(mColumn != null) {
+                mColumn.remove(mLastDom);
+            }
         }
-
-        return mRow.size();
     }
-
-    private int getWestAddIdx() {
-        if(mRow == null) {
-            return BAD_IDX;
-        }
-
-        return 0;
-    }
-
-    private int getNorthAddIdx() {
-        if(mColumn == null) {
-            return BAD_IDX;
-        }
-
-        return 0;
-    }
-
-    private int getSouthAddIdx() {
-        if(mColumn == null) {
-            return BAD_IDX;
-        }
-
-        return mColumn.size();
-    }
-
-    private int getEastIdx() {
-        if(mRow == null) {
-            return BAD_IDX;
-        }
-
-        return mRow.size() - 1;
-    }
-
-    private int getWestIdx() {
-        if(mRow == null) {
-            return BAD_IDX;
-        }
-
-        return 0;
-    }
-
-    private int getNorthIdx() {
-        if(mColumn == null) {
-            return BAD_IDX;
-        }
-
-        return 0;
-    }
-
-    private int getSouthIdx() {
-        if(mColumn == null) {
-            return BAD_IDX;
-        }
-
-        return mColumn.size() - 1;
-    }
-
-    private void updatedSpinnerFlanked() {
-        int spinnerRowIdx = getSpinnerRow();
-
-        mSpinnerFlanked =
-            (spinnerRowIdx > 0 && spinnerRowIdx < getEastIdx());
-
-        Logging.LogMsg(LogLevel.DEBUG, TAG, "updatedSpinnerFlanked, spinner is flanked: " + mSpinnerFlanked);
-    }
-
-    private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
-        mBoardOpen = false;
-        mLastDomPos = idx;
-        mLastDomLoc = curList;
-        curList.add(idx, dom);
-    }
-
-    private void setSpinner(Dominoe theDominoe, int rowIdx) {
-        Logging.LogMsg(LogLevel.TRACE, TAG, "setSpinner first double played");
-        theDominoe.setOrientation(Orientation.SIDE1_NORTH);
-        mColumn = new ArrayList<Dominoe>();
-        addDomino(theDominoe, mColumn, 0);
-        mSpinner = theDominoe;
-
-        //Add to row
-        addDomino(theDominoe, mRow, rowIdx);
-    }
-
-    //TODO: Add "removeLast" to remove last domino added to board if not "committed"
-    //TODO: Update putDominoe function to reject domino if previous one was not committed
 
     /**
      * Commits the last domino played on the board.  Cannot be undone.
      */
     public void commitBoardState() {
         mBoardOpen = true;
+        mLastDom = null;
     }
 
     /**
@@ -296,6 +218,197 @@ public class DominoeGameBoard {
         return success;
     }
 
+    /**
+     * Returns the current board row.
+     * <p>
+     * @return ArrayList<Dominoe> : Row of the game board
+     */
+    public ArrayList<Dominoe> getRow() {
+        return mRow;
+    }
+
+    /**
+     * Returns the current board column.
+     * <p>
+     * @return ArrayList<Dominoe> : Column of the game board
+     */
+    public ArrayList<Dominoe> getColumn() {
+        return mColumn;
+    }
+
+    private int getEastAddIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return mRow.size();
+    }
+
+    /**
+     * Returns the current spinner
+     * <p>
+     * @return Dominoe : Board spinner
+     */
+    public Dominoe getSpinner() {
+        return mSpinner;
+    }
+
+
+    //TODO: Consider making private
+    public int getSpinnerRow() {
+        return getSpinnerIdx(mRow);
+    }
+
+    public int getSpinnerColumn() {
+        return getSpinnerIdx(mColumn);
+    }
+
+    /**
+     * Returns board empty status
+     * <p>
+     * @return boolean : Status of board being empty
+     */
+    public boolean isEmpty() {
+        return mIsEmpty;
+    }
+
+    public int getPerimTotal() {
+        int eastVal = 0, westVal = 0, northVal = 0, southVal = 0;
+        int eastIdx, westIdx, northIdx, southIdx;
+        Dominoe curDom;
+
+        eastIdx = getEastIdx();
+        //THe row is ALWAYS created and if it doesn't exist, the board should be empty
+        if(eastIdx == BAD_IDX) {
+            return 0;
+        }
+
+        //If there is a valid domino in the east location, just use it
+        curDom = mRow.get(eastIdx);
+        Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for east domino: " + curDom + ", orientation: " +
+                       curDom.getOrientation() + ", index: " + eastIdx);
+        eastVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.EAST);
+        Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got east value: " + eastVal);
+
+        //If there is only one domino and it is NOT a double, we need the other side to add
+        //to the total.  If there is more than one, add it as normal
+        westIdx = getWestIdx();
+        if((westIdx == eastIdx && !curDom.isDouble()) ||
+           (westIdx != eastIdx                      )   ) {
+            curDom = mRow.get(westIdx);
+            westVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.WEST);
+            Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for west domino: " + curDom + ", orientation: " +
+                           curDom.getOrientation() + ", index: " + westIdx);
+            Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got west value: " + westVal);
+        }
+
+        //The spinner itself doesn't count towards the total from the column
+        //The column never has one domino that is used for both north and south (unlike the row)
+        //So it is not needed to handle the column the same way as the row
+        northIdx = getNorthIdx();
+        if(northIdx != BAD_IDX) {
+            curDom = mColumn.get(northIdx);
+            if(curDom != mSpinner) {
+                northVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.NORTH);
+                Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got north value: " + northVal);
+            }
+        }
+
+        southIdx = getSouthIdx();
+        if(southIdx != BAD_IDX) {
+            curDom = mColumn.get(southIdx);
+            if(curDom != mSpinner) {
+                southVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.SOUTH);
+                Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got south value: " + southVal);
+            }
+        }
+
+        return (eastVal + westVal + northVal + southVal);
+    }
+
+    //********************************Private Functions*********************************
+    private int getWestAddIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getNorthAddIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getSouthAddIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return mColumn.size();
+    }
+
+    private int getEastIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return mRow.size() - 1;
+    }
+
+    private int getWestIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getNorthIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return 0;
+    }
+
+    private int getSouthIdx() {
+        if(mColumn == null) {
+            return BAD_IDX;
+        }
+
+        return mColumn.size() - 1;
+    }
+
+    private void updatedSpinnerFlanked() {
+        int spinnerRowIdx = getSpinnerRow();
+
+        mSpinnerFlanked =
+            (spinnerRowIdx > 0 && spinnerRowIdx < getEastIdx());
+
+        Logging.LogMsg(LogLevel.DEBUG, TAG, "updatedSpinnerFlanked, spinner is flanked: " + mSpinnerFlanked);
+    }
+
+    private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
+        mBoardOpen = false;
+        mLastDom = dom;
+        curList.add(idx, dom);
+    }
+
+    private void setSpinner(Dominoe theDominoe, int rowIdx) {
+        Logging.LogMsg(LogLevel.TRACE, TAG, "setSpinner first double played");
+        theDominoe.setOrientation(Orientation.SIDE1_NORTH);
+        mColumn = new ArrayList<Dominoe>();
+        addDomino(theDominoe, mColumn, 0);
+        mSpinner = theDominoe;
+
+        //Add to row
+        addDomino(theDominoe, mRow, rowIdx);
+    }
+
     boolean checkMatch(Dominoe newDom, Dominoe boardDom, Orientation targetOrtn) {
         boolean success = false;
         int curSide = 0;
@@ -377,36 +490,12 @@ public class DominoeGameBoard {
         return success;
     }
 
-    public ArrayList<Dominoe> getRow() {
-        return mRow;
-    }
-
-    public ArrayList<Dominoe> getColumn() {
-        return mColumn;
-    }
-
     private int getSpinnerIdx(ArrayList<Dominoe> list) {
         if(list == null || mSpinner == null) {
             return BAD_IDX;
         }
 
         return list.indexOf(mSpinner);
-    }
-
-    public Dominoe getSpinner() {
-        return mSpinner;
-    }
-
-    public int getSpinnerRow() {
-        return getSpinnerIdx(mRow);
-    }
-
-    public int getSpinnerColumn() {
-        return getSpinnerIdx(mColumn);
-    }
-
-    public boolean isEmpty() {
-        return mIsEmpty;
     }
 
     private int getEdgeVal(Dominoe curDom, Orientation ortn, EdgeLocation edge) {
@@ -452,57 +541,4 @@ public class DominoeGameBoard {
         return retVal;
     }
 
-    public int getPerimTotal() {
-        int eastVal = 0, westVal = 0, northVal = 0, southVal = 0;
-        int eastIdx, westIdx, northIdx, southIdx;
-        Dominoe curDom;
-
-        eastIdx = getEastIdx();
-        //THe row is ALWAYS created and if it doesn't exist, the board should be empty
-        if(eastIdx == BAD_IDX) {
-            return 0;
-        }
-
-        //If there is a valid domino in the east location, just use it
-        curDom = mRow.get(eastIdx);
-        Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for east domino: " + curDom + ", orientation: " +
-                       curDom.getOrientation() + ", index: " + eastIdx);
-        eastVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.EAST);
-        Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got east value: " + eastVal);
-
-        //If there is only one domino and it is NOT a double, we need the other side to add
-        //to the total.  If there is more than one, add it as normal
-        westIdx = getWestIdx();
-        if((westIdx == eastIdx && !curDom.isDouble()) ||
-           (westIdx != eastIdx                      )   ) {
-            curDom = mRow.get(westIdx);
-            westVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.WEST);
-            Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for west domino: " + curDom + ", orientation: " +
-                           curDom.getOrientation() + ", index: " + westIdx);
-            Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got west value: " + westVal);
-        }
-
-        //The spinner itself doesn't count towards the total from the column
-        //The column never has one domino that is used for both north and south (unlike the row)
-        //So it is not needed to handle the column the same way as the row
-        northIdx = getNorthIdx();
-        if(northIdx != BAD_IDX) {
-            curDom = mColumn.get(northIdx);
-            if(curDom != mSpinner) {
-                northVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.NORTH);
-                Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got north value: " + northVal);
-            }
-        }
-
-        southIdx = getSouthIdx();
-        if(southIdx != BAD_IDX) {
-            curDom = mColumn.get(southIdx);
-            if(curDom != mSpinner) {
-                southVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.SOUTH);
-                Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got south value: " + southVal);
-            }
-        }
-
-        return (eastVal + westVal + northVal + southVal);
-    }
 }
