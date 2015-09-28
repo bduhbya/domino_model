@@ -94,25 +94,23 @@ public class DominoeGameBoard {
                 mRow.remove(mLastDom);
                 Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, tried to remove domino, row size: " + mRow.size() + ", contents:");
                 printList(mRow);
+                if(mRow.isEmpty()) {
+                    mRow = null;
+                }
             }
             if(mColumn != null) {
-                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, mLostDom: " + mLastDom + ", col size before: " + mRow.size());
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, mLostDom: " + mLastDom + ", col size before: " + mColumn.size());
                 mColumn.remove(mLastDom);
-                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, tried to remove domino, col size: " + mRow.size() + ", contents:");
+                Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, tried to remove domino, col size: " + mColumn.size() + ", contents:");
                 printList(mColumn);
+                if(mColumn.isEmpty()) {
+                    mColumn = null;
+                }
             }
 
             if(mSpinner == mLastDom) {
                 Logging.LogMsg(LogLevel.TRACE, TAG, "removeLast, last matched spinner, spinner set null");
                 mSpinner = null;
-            }
-
-            //If row or column is empty, destroy them for future processing
-            if(mRow.isEmpty()) {
-                mRow = null;
-            }
-            if(mColumn.isEmpty()) {
-                mColumn = null;
             }
 
             mIsEmpty = (mRow == null && mColumn == null);
