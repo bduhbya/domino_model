@@ -131,12 +131,90 @@ public class FunctionalTesting {
     }
 
     public boolean runAutomatedTests() {
-        boolean success;
+        boolean success = true;
+        boolean tempSuccess;
 
-        success = testDomino();
-        success = testBoneYard();
+        //TODO: Refactor to be like gameboard tests in array
+        tempSuccess = testDomino();
+        if(success) success = tempSuccess;
+        tempSuccess = testBoneYard();
+        if(success) success = tempSuccess;
+        tempSuccess = testDominoePlayer();
+        if(success) success = tempSuccess;
 
         return success;
+    }
+
+    public boolean testDominoePlayer() {
+        boolean success = true, tstClassSuccess = true;
+        int[] passFailCtr = new int[PASS_FAIL_CNDS];
+        ArrayList<String> messages = new ArrayList<String>();
+        final String name = "Test Player", userName = "TestUname";
+        final boolean initialTurn = false, setTurn = true;
+        final int initialScore = 0, setNewScore = 15;
+        DominoePlayer player;
+        final String TEST_CLASS = "DominoePlayer class testing";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoePlayer Class Tests");
+
+        //Case new player with default values
+        player = new DominoePlayer(name, userName);
+        if(player.getDisplayName() != name) {
+            success = false;
+            messages.add("Display name mismatch.  Constructed with: " + name + ", got: " + player.getDisplayName());
+        }
+
+        if(player.getUserName() != userName) {
+            success = false;
+            messages.add("User name mismatch.  Constructed with: " + userName + ", got: " + player.getUserName());
+        }
+
+        if(player.isMyTurn() != initialTurn) {
+            success = false;
+            messages.add("My turn mismatch.  Expected initial value:  " + initialTurn + ", got: " + player.isMyTurn());
+        }
+
+        if(player.getScore() != initialScore) {
+            success = false;
+            messages.add("Score mismatch.  Expected initial value:  " + initialScore + ", got: " + player.getScore());
+        }
+
+        logSuccess(success, "DominoePlayer: New player object", messages, passFailCtr);
+
+        //Case set isMyTurn
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        success = true;
+        messages.clear();
+
+        player.setMyTurn(setTurn);
+
+        if(player.isMyTurn() != setTurn) {
+            success = false;
+            messages.add("My turn mismatch.  Set value:  " + setTurn + ", got: " + player.isMyTurn());
+        }
+
+        logSuccess(success, "DominoePlayer: Set player turn status", messages, passFailCtr);
+
+        //Case set setScore
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        success = true;
+        messages.clear();
+
+        player.setScore(setNewScore);
+
+        if(player.getScore() != setNewScore) {
+            success = false;
+            messages.add("Score mismatch.  Expected initial value:  " + setNewScore + ", got: " + player.getScore());
+        }
+
+        logSuccess(success, "DominoePlayer: Set player score", messages, passFailCtr);
+
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
+
+        return tstClassSuccess;
+        
     }
 
     public boolean testBoneYard() {
@@ -168,7 +246,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoBoneyard: New empty boneyard", messages, passFailCtr);
 
         //Case set yard populates the bone yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -187,7 +265,7 @@ public class FunctionalTesting {
         }
 
         //Case wash the bone yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = false;
         messages.clear();
 
@@ -240,7 +318,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoBoneyard: wash the yard", messages, passFailCtr);
 
         //Case remove a domino from the yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -258,8 +336,9 @@ public class FunctionalTesting {
 
         logSuccess(success, "DominoBoneyard: remove domino from the yard", messages, passFailCtr);
 
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
-        return success;
+        return tstClassSuccess;
     }
 
     public boolean testDomino() {
@@ -291,7 +370,7 @@ public class FunctionalTesting {
         logSuccess(success, "Dominoe: Create new double", messages, passFailCtr);
 
         //Case create non-double
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
         tempDom = new Dominoe(regSide1, regSide2);
@@ -310,7 +389,7 @@ public class FunctionalTesting {
         logSuccess(success, "Dominoe: Create new non-double", messages, passFailCtr);
 
         //Case set and get orientation
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
         ArrayList<Orientation> testOrtns = new ArrayList<Dominoe.Orientation>();
@@ -332,7 +411,7 @@ public class FunctionalTesting {
         //Case get dominoe set
         tempDom = new Dominoe(dblSide1, dblSide2);
         messages.clear();
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);;
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         success = true;
         domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
 
@@ -348,8 +427,9 @@ public class FunctionalTesting {
 
         logSuccess(success, "Dominoe: Get set of type " + SetType.DOUBLE_SIX, messages, passFailCtr);
 
+        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
         logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
-        return success;
+        return tstClassSuccess;
     }
 
     public static iGameBoardTest[] mGameBoardTests = {
@@ -920,10 +1000,12 @@ public class FunctionalTesting {
         FunctionalTesting test = new FunctionalTesting();
         boolean success = false;
 
-        Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start...");
 
         //Run all automated tests
         success = test.runAutomatedTests();
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing overall result: " + ((success == true) ? "PASS" : "FAIL"));
 
         test.initializeGUI();
 
