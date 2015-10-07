@@ -33,9 +33,9 @@ public class DominoeGameOptions {
     public DominoeGameOptions(int numPlayers, int scoreThreshold, int startScore, int scoreMult, int domPerHand) {
         mNumPlayers = numPlayers;
         mScoreThreshold = scoreThreshold;
-        mMinStartingScore = startScore
+        mMinStartingScore = startScore;
         mScoreMultiple = scoreMult;
-        mNumDomPerHand = domPerHandl
+        mNumDomPerHand = domPerHand;
     }
 
     /**

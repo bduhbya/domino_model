@@ -37,16 +37,16 @@ public class FunctionalTesting {
     private GameBoardGraphicsPanel mPanel;
     private JButton mNextGameBrdTestBtn;
     private GameBoardBtnActionListener mNextGameBrdTestListener;
-    private int mCurGameBoardTest;
+    private int mCurEventBasedFunctionalTest;
     private int[] mPassFailCtr;
     private boolean mTstClassSuccess;
 
     public FunctionalTesting() {
-        mCurGameBoardTest = 0;
+        mCurEventBasedFunctionalTest = 0;
         mPassFailCtr = new int[PASS_FAIL_CNDS];
     }
 
-    public interface iGameBoardTest { 
+    public interface IFunctionalTest { 
         //boolean initTest();
         boolean runTest(FunctionalTesting test);
     }
@@ -135,7 +135,7 @@ public class FunctionalTesting {
         boolean tempSuccess;
 
         //TODO: Refactor to be like gameboard tests in array
-        tempSuccess = testDomino();
+        tempSuccess = testDomino(this);
         if(success) success = tempSuccess;
         tempSuccess = testBoneYard();
         if(success) success = tempSuccess;
@@ -341,100 +341,131 @@ public class FunctionalTesting {
         return tstClassSuccess;
     }
 
-    public boolean testDomino() {
-        boolean success = true, tstClassSuccess = true;
-        int[] passFailCtr = new int[PASS_FAIL_CNDS];
-        Dominoe tempDom;
-        ArrayList<String> messages = new ArrayList<String>();
-        int dblSide1 = 0, dblSide2 = 0;
-        int regSide1 = 2, regSide2 = 3;
-        ArrayList<Dominoe> domSet;
-        final String TEST_CLASS = "Domino class testing";
+    public boolean testDomino(FunctionalTesting test) {
+        boolean success = true;
+        final String TEST_CLASS_NAME = "Domino Class Tests";
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running Domnoe Class Tests");
-        //Case create new double
-        tempDom = new Dominoe(dblSide1, dblSide2);
-        messages.add("Testing double: " + tempDom);
-        if(!tempDom.isDouble()) {
-            success = false;
-            messages.add("isDouble returned false");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_CLASS_NAME);
+
+        test.resetTestMetrics();
+
+        for(IFunctionalTest curTest : mDominoTests) {
+             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
-        if(tempDom.getSide1() != dblSide1 || tempDom.getSide2() != dblSide2) {
-            success = false;
-            messages.add("Sides do not match created values.  Created: "
-                         + dblSide1 + "|" + dblSide2 + ", found: " + tempDom);
-        }
-
-        logSuccess(success, "Dominoe: Create new double", messages, passFailCtr);
-
-        //Case create non-double
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
-        success = true;
-        messages.clear();
-        tempDom = new Dominoe(regSide1, regSide2);
-        messages.add("Testing non-double: " + tempDom);
-        if(tempDom.isDouble()) {
-            success = false;
-            messages.add("isDouble returned true");
-        }
-
-        if(tempDom.getSide1() != regSide1 || tempDom.getSide2() != regSide2) {
-            success = false;
-            messages.add("Sides do not match created values.  Created: "
-                         + regSide1 + "|" + regSide2 + ", found: " + tempDom);
-        }
-
-        logSuccess(success, "Dominoe: Create new non-double", messages, passFailCtr);
-
-        //Case set and get orientation
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
-        success = true;
-        messages.clear();
-        ArrayList<Orientation> testOrtns = new ArrayList<Dominoe.Orientation>();
-        //TODO: Look up how iterate through enums better in Java
-        testOrtns.add(Orientation.SIDE1_NORTH);
-        testOrtns.add(Orientation.SIDE1_SOUTH);
-        testOrtns.add(Orientation.SIDE1_EAST);
-        testOrtns.add(Orientation.SIDE1_WEST);
-        for(Dominoe.Orientation curOrtn : testOrtns) {
-            tempDom.setOrientation(curOrtn);
-            if(tempDom.getOrientation() != curOrtn) {
-                success = false;
-                messages.add("Calling setOrientation(" + curOrtn + ") doesn't match getOrientation(" +  tempDom.getOrientation());
-            }
-        }
-
-        logSuccess(success, "Dominoe: Set and get orientation", messages, passFailCtr);
-
-        //Case get dominoe set
-        tempDom = new Dominoe(dblSide1, dblSide2);
-        messages.clear();
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
-        success = true;
-        domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
-
-        if(domSet == null) {
-            success = false;
-            messages.add("Function getDominoeSet returned null");
-        }
-
-        //TODO: Lookup clever java way to validate all dominoes are present in set
-        for(Dominoe dom : domSet) {
-            messages.add("Dominoe: " + dom);
-        }
-
-        logSuccess(success, "Dominoe: Get set of type " + SetType.DOUBLE_SIX, messages, passFailCtr);
-
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
-        logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
-        return tstClassSuccess;
+        logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
+        return test.mTstClassSuccess;
     }
 
-    public static iGameBoardTest[] mGameBoardTests = {
+    public static IFunctionalTest[] mDominoTests = {
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            Dominoe tempDom;
+            ArrayList<String> messages = new ArrayList<String>();
+            int dblSide1 = 0, dblSide2 = 0;
+            final String TEST_NAME = "Dominoe: Create new double";
+
+            //Case create new double
+            tempDom = new Dominoe(dblSide1, dblSide2);
+            messages.add("Testing double: " + tempDom);
+            if(!tempDom.isDouble()) {
+                success = false;
+                messages.add("isDouble returned false, expected true");
+            }
+
+            if(tempDom.getSide1() != dblSide1 || tempDom.getSide2() != dblSide2) {
+                success = false;
+                messages.add("Sides do not match created values.  Created: "
+                             + dblSide1 + "|" + dblSide2 + ", found: " + tempDom);
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            Dominoe tempDom;
+            ArrayList<String> messages = new ArrayList<String>();
+            int regSide1 = 2, regSide2 = 3;
+            final String TEST_NAME = "Dominoe: Create new non-double";
+
+            //Case create non-double
+            tempDom = new Dominoe(regSide1, regSide2);
+            messages.add("Testing non-double: " + tempDom);
+            if(tempDom.isDouble()) {
+                success = false;
+                messages.add("isDouble returned true, expected false");
+            }
+
+            if(tempDom.getSide1() != regSide1 || tempDom.getSide2() != regSide2) {
+                success = false;
+                messages.add("Sides do not match created values.  Created: "
+                             + regSide1 + "|" + regSide2 + ", found: " + tempDom);
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            Dominoe tempDom;
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "Dominoe: Set and get orientation";
+
+            //Case set and get orientation
+            ArrayList<Orientation> testOrtns = new ArrayList<Dominoe.Orientation>();
+            tempDom = new Dominoe(0,0);
+            //TODO: Look up how iterate through enums better in Java
+            testOrtns.add(Orientation.SIDE1_NORTH);
+            testOrtns.add(Orientation.SIDE1_SOUTH);
+            testOrtns.add(Orientation.SIDE1_EAST);
+            testOrtns.add(Orientation.SIDE1_WEST);
+            for(Dominoe.Orientation curOrtn : testOrtns) {
+                tempDom.setOrientation(curOrtn);
+                if(tempDom.getOrientation() != curOrtn) {
+                    success = false;
+                    messages.add("Calling setOrientation(" + curOrtn + ") doesn't match getOrientation(" +  tempDom.getOrientation());
+                }
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            ArrayList<String> messages = new ArrayList<String>();
+            ArrayList<Dominoe> domSet;
+            final String TEST_NAME = "Dominoe: Get set of type " + SetType.DOUBLE_SIX;
+
+            //Case get dominoe set
+            domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
+
+            if(domSet == null) {
+                success = false;
+                messages.add("Function getDominoeSet returned null");
+            }
+
+            //TODO: Lookup clever java way to validate all dominoes are present in set
+            for(Dominoe dom : domSet) {
+                messages.add("Dominoe: " + dom);
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+            return success;
+        }}
+    };
+
+    public static IFunctionalTest[] mGameBoardTests = {
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             ArrayList<Dominoe> row = null, col = null;
@@ -515,7 +546,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(3, 2), new Dominoe(6, 5), new Dominoe(2, 1)};
@@ -536,7 +567,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 4)};
@@ -557,7 +588,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
@@ -583,7 +614,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
@@ -609,7 +640,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 4), new Dominoe(4, 3), new Dominoe(6, 6)};
@@ -635,7 +666,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
@@ -661,7 +692,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
@@ -687,7 +718,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
@@ -708,7 +739,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
@@ -729,7 +760,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
@@ -750,7 +781,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
@@ -771,7 +802,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(3, 0)};
@@ -807,7 +838,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
             DominoeGameBoard board = new DominoeGameBoard();
             ArrayList<String> messages = new ArrayList<String>();
@@ -839,7 +870,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
             DominoeGameBoard board = new DominoeGameBoard();
             ArrayList<String> messages = new ArrayList<String>();
@@ -871,7 +902,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3)};
@@ -912,7 +943,7 @@ public class FunctionalTesting {
             return success;
         }},
 
-        new iGameBoardTest() { @Override public boolean runTest(FunctionalTesting test) {
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoeGameBoard board = new DominoeGameBoard();
             Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(5, 2)};
@@ -968,16 +999,17 @@ public class FunctionalTesting {
         @Override
         public void actionPerformed(ActionEvent e) { 
 
-            if(mTest.mCurGameBoardTest == 0) {
+            if(mTest.mCurEventBasedFunctionalTest == 0) {
                 mTest.resetTestMetrics();
             }
 
-            mTest.mTstClassSuccess = checkClassSuccess(mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurGameBoardTest].runTest(mTest));
-            mTest.mCurGameBoardTest++;
+            mTest.mTstClassSuccess = checkClassSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
+            mTest.mCurEventBasedFunctionalTest++;
 
-            if(mTest.mCurGameBoardTest == FunctionalTesting.mGameBoardTests.length) {
+            if(mTest.mCurEventBasedFunctionalTest == FunctionalTesting.mGameBoardTests.length) {
                 mTest.mNextGameBrdTestBtn.setEnabled(false);
                 logSummary(TEST_BOARD_CLASS, mTest.mTstClassSuccess, mTest.mPassFailCtr);
+                mTest.mCurEventBasedFunctionalTest = 0;
             }
         }
     }
@@ -1011,7 +1043,7 @@ public class FunctionalTesting {
 
         //Test game board
         //TODO: Determine if cmd line or build switch should automate
-        //game baord tests that are currently run manually and visually
+        //game board tests that are currently run manually and visually
         //inspected.  These tests can be run without visual inspection.
 //        success = test.testGameBoard();
     }
