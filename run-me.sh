@@ -1,4 +1,4 @@
 #! /bin/bash
 
 cd src/main/java
-java com.bduhbsoft.BigSixDominoes.FunctionalTesting
+java com.bduhbsoft.BigSixDominoes.FunctionalTesting $@

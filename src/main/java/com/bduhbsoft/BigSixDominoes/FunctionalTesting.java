@@ -2,6 +2,8 @@ package com.bduhbsoft.BigSixDominoes;
 
 import javax.swing.JFrame;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
@@ -32,6 +34,14 @@ public class FunctionalTesting {
     private final static int SCREEN_WIDTH = 1280;
     private final static int SCREEN_HEIGHT = 720;
     private final static int DOM_PLAY_SLEEP_TIME_MS = 1000;
+    private final static String RUN_GUI_TESTS = "-g"; //Run GUI tests instead of automating
+    private final static String LOG_OPT = "--log";
+    private final static String LOG_LEVEL_TRACE = LOG_OPT + "=trace";
+    private final static String LOG_LEVEL_DEBUG = LOG_OPT + "=debug";
+    private final static String LOG_LEVEL_WARN = LOG_OPT + "=warn";
+    private final static String LOG_LEVEL_INFO = LOG_OPT + "=info";
+    private final static String LOG_LEVEL_ERROR = LOG_OPT + "=error";
+    private final static Map<String, LogLevel> LOG_MAP = new HashMap<>();
 
     private JFrame mApplication;
     private GameBoardGraphicsPanel mPanel;
@@ -40,10 +50,18 @@ public class FunctionalTesting {
     private int mCurEventBasedFunctionalTest;
     private int[] mPassFailCtr;
     private boolean mTstClassSuccess;
+    private boolean mRunGuiTests;
 
     public FunctionalTesting() {
         mCurEventBasedFunctionalTest = 0;
         mPassFailCtr = new int[PASS_FAIL_CNDS];
+        mRunGuiTests = false;
+
+        LOG_MAP.put(LOG_LEVEL_TRACE, LogLevel.TRACE);
+        LOG_MAP.put(LOG_LEVEL_DEBUG, LogLevel.DEBUG);
+        LOG_MAP.put(LOG_LEVEL_WARN, LogLevel.WARN);
+        LOG_MAP.put(LOG_LEVEL_INFO, LogLevel.INFO);
+        LOG_MAP.put(LOG_LEVEL_ERROR, LogLevel.ERROR);
     }
 
     public interface IFunctionalTest { 
@@ -77,10 +95,12 @@ public class FunctionalTesting {
 
     private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points, String testName) {
 
-        mPanel.setBoard(row, col, spinner, points);
-        mPanel.setTitle(testName);
-        mPanel.revalidate();
-        mPanel.repaint();
+        if(mRunGuiTests) {
+            mPanel.setBoard(row, col, spinner, points);
+            mPanel.setTitle(testName);
+            mPanel.revalidate();
+            mPanel.repaint();
+        }
 
         return;
     }
@@ -141,8 +161,29 @@ public class FunctionalTesting {
         if(success) success = tempSuccess;
         tempSuccess = testDominoePlayer();
         if(success) success = tempSuccess;
+        if(!mRunGuiTests) {
+            tempSuccess = testDominoGameBoard(this);
+            if(success) success = tempSuccess;
+        }
 
         return success;
+    }
+
+    public boolean testDominoGameBoard(FunctionalTesting test) {
+        boolean success = true;
+        final String TEST_CLASS_NAME = "DominoGameBoard Class Tests";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_CLASS_NAME);
+
+        test.resetTestMetrics();
+
+        for(IFunctionalTest curTest : mGameBoardTests) {
+             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+        }
+
+        logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
+        return test.mTstClassSuccess;
     }
 
     public boolean testDominoePlayer() {
@@ -1015,22 +1056,39 @@ public class FunctionalTesting {
     }
 
     public void initializeGUI() {
-        this.mPanel = new GameBoardGraphicsPanel();
-        this.mApplication = new JFrame();
-        this.mNextGameBrdTestListener = new GameBoardBtnActionListener(this);
-        this.mNextGameBrdTestBtn = new JButton("Next GameBoard Test");
-        this.mNextGameBrdTestBtn.addActionListener(mNextGameBrdTestListener);
+        if(mRunGuiTests) {
+            this.mPanel = new GameBoardGraphicsPanel();
+            this.mApplication = new JFrame();
+            this.mNextGameBrdTestListener = new GameBoardBtnActionListener(this);
+            this.mNextGameBrdTestBtn = new JButton("Next GameBoard Test");
+            this.mNextGameBrdTestBtn.addActionListener(mNextGameBrdTestListener);
 
-        this.mApplication.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.mApplication.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-        this.mApplication.add(this.mPanel, BorderLayout.CENTER);
-        this.mApplication.add(this.mNextGameBrdTestBtn, BorderLayout.SOUTH);
-        this.mApplication.setVisible(true); 
+            this.mApplication.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            this.mApplication.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            this.mApplication.add(this.mPanel, BorderLayout.CENTER);
+            this.mApplication.add(this.mNextGameBrdTestBtn, BorderLayout.SOUTH);
+            this.mApplication.setVisible(true);
+        }
+    }
+
+    public void processArgs(String[] args) {
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "Received " + args.length + " command line args:");
+        for(String curArg : args) {
+            Logging.LogMsg(LogLevel.INFO, TAG, "    " + curArg);
+            if(curArg.equals(RUN_GUI_TESTS)) {
+                mRunGuiTests = true;
+            } else if(curArg.contains(LOG_OPT)) {
+                Logging.setLogLevel(LOG_MAP.get(curArg));
+            }
+        }
     }
 
     public static void main(String[] args) {
         FunctionalTesting test = new FunctionalTesting();
         boolean success = false;
+
+        if(args.length > 0) test.processArgs(args);
 
         Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing start...");
 
@@ -1040,11 +1098,5 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "Functional testing overall result: " + ((success == true) ? "PASS" : "FAIL"));
 
         test.initializeGUI();
-
-        //Test game board
-        //TODO: Determine if cmd line or build switch should automate
-        //game board tests that are currently run manually and visually
-        //inspected.  These tests can be run without visual inspection.
-//        success = test.testGameBoard();
     }
 }
