@@ -155,16 +155,18 @@ public class FunctionalTesting {
         boolean tempSuccess;
 
         //TODO: Refactor to be like gameboard tests in array
+        if(!mRunGuiTests) {
+            tempSuccess = testDominoGameBoard(this);
+            if(success) success = tempSuccess;
+        }
         tempSuccess = testDomino(this);
         if(success) success = tempSuccess;
         tempSuccess = testBoneYard();
         if(success) success = tempSuccess;
         tempSuccess = testDominoePlayer();
         if(success) success = tempSuccess;
-        if(!mRunGuiTests) {
-            tempSuccess = testDominoGameBoard(this);
-            if(success) success = tempSuccess;
-        }
+        tempSuccess = testDominoeGameOptions(this);
+        if(success) success = tempSuccess;
 
         return success;
     }
@@ -179,6 +181,23 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mGameBoardTests) {
+             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+        }
+
+        logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
+        return test.mTstClassSuccess;
+    }
+
+    public boolean testDominoeGameOptions(FunctionalTesting test) {
+        boolean success = true;
+        final String TEST_CLASS_NAME = "DominoGameBoardOptions Class Tests";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_CLASS_NAME);
+
+        test.resetTestMetrics();
+
+        for(IFunctionalTest curTest : mGameOptionsTests) {
              test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
@@ -460,14 +479,8 @@ public class FunctionalTesting {
             final String TEST_NAME = "Dominoe: Set and get orientation";
 
             //Case set and get orientation
-            ArrayList<Orientation> testOrtns = new ArrayList<Dominoe.Orientation>();
             tempDom = new Dominoe(0,0);
-            //TODO: Look up how iterate through enums better in Java
-            testOrtns.add(Orientation.SIDE1_NORTH);
-            testOrtns.add(Orientation.SIDE1_SOUTH);
-            testOrtns.add(Orientation.SIDE1_EAST);
-            testOrtns.add(Orientation.SIDE1_WEST);
-            for(Dominoe.Orientation curOrtn : testOrtns) {
+            for(Dominoe.Orientation curOrtn : Dominoe.Orientation.values()) {
                 tempDom.setOrientation(curOrtn);
                 if(tempDom.getOrientation() != curOrtn) {
                     success = false;
@@ -504,6 +517,39 @@ public class FunctionalTesting {
         }}
     };
 
+    public static IFunctionalTest[] mGameOptionsTests = {
+        
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            DominoeGameOptions options = null;
+            final String TEST_NAME = "DominoGameBoardOptions: Create options object";
+            ArrayList<String> messages = new ArrayList<>();
+
+            options = new DominoeGameOptions(DominoeGameOptions.DEFAULT_PLAYERS,
+                                             DominoeGameOptions.SCORE_THRESHOLD,
+                                             DominoeGameOptions.MIN_START_SCORE,
+                                             DominoeGameOptions.DOM_PER_HAND);
+
+            if(options.getNumPlayers()       != DominoeGameOptions.DEFAULT_PLAYERS ||
+               options.getScoreThreshold()   != DominoeGameOptions.SCORE_THRESHOLD ||
+               options.getMinStartingScore() != DominoeGameOptions.MIN_START_SCORE ||
+               options.getNumDomPerHand()    != DominoeGameOptions.DOM_PER_HAND       ) {
+                messages.add("Options do not match created values, expected num players: " + DominoeGameOptions.DEFAULT_PLAYERS +
+                             ", found: " + options.getNumPlayers() + ", expected threshold: " + DominoeGameOptions.SCORE_THRESHOLD +
+                             ", found: " + options.getScoreThreshold() + ", expected starting score: " + DominoeGameOptions.MIN_START_SCORE +
+                             ", found: " + options.getMinStartingScore() + ", expected dominoes per hand: " + DominoeGameOptions.DOM_PER_HAND +
+                             ", found: " + options.getNumDomPerHand());
+                success = false;
+            }
+
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }}
+    };
+
     public static IFunctionalTest[] mGameBoardTests = {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
@@ -516,9 +562,6 @@ public class FunctionalTesting {
             int regSide1 = 2, regSide2 = 3;
             final String TEST_NAME = "DominoeGameBoard: Add double to empty board";
             String title;
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: put double domino on empty board
             curDom = new Dominoe(dblSide1, dblSide2);
@@ -597,9 +640,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Create a row of dominoes with a spinner, all dominoes succeed
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
             
@@ -618,9 +658,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create Single Row With NO Spinner";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Create a row of dominoes without a spinner, all dominoes succeed
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
@@ -638,9 +675,6 @@ public class FunctionalTesting {
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at EAST";
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Create a row of dominoes with the spinner the last dominoe on the east side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -665,9 +699,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at WEST First Domino Played EAST";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Create a row of dominoes with the spinner the last dominoe on the east side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
@@ -690,9 +721,6 @@ public class FunctionalTesting {
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create Single Row With Spinner Played NOT First at WEST";
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -717,9 +745,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create column with NORTH Domino Only";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
@@ -742,9 +767,6 @@ public class FunctionalTesting {
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Create column with SOUTH Domino Only";
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -769,9 +791,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Add bad domino to NORTH side with a east half-flanked spinner";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Test playing a matchng domino to the NORTH side with a east half-flanked spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
@@ -789,9 +808,6 @@ public class FunctionalTesting {
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Add bad domino to SOUTH side with a east half-flanked spinner";
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Test playing a matchng domino to the SOUTH side with a east half-flanked spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -811,9 +827,6 @@ public class FunctionalTesting {
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Add bad domino to NORTH side with a full-flanked spinner";
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             //Case: Test playing a non-matchng domino to the NORTH side with a full-flanked spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
@@ -831,9 +844,6 @@ public class FunctionalTesting {
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoeGameBoard: Add bad domino to SOUTH side with a full-flanked spinner";
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Test playing a non-matchng domino to the SOUTH side with a full-flanked spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -854,9 +864,6 @@ public class FunctionalTesting {
             final String TEST_NAME = "DominoeGameBoard: Add domino without committing last domino";
             Dominoe tempDom;
             EdgeLocation tempLoc;
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Test playing a domino when last domino was not committed to the board
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -887,9 +894,6 @@ public class FunctionalTesting {
             Dominoe tempDom;
             EdgeLocation tempLoc;
 
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
-
             tempDom = new Dominoe(3, 3);
             tempLoc = EdgeLocation.WEST;
             if(board.putDominoe(tempDom, tempLoc)) {
@@ -918,9 +922,6 @@ public class FunctionalTesting {
             final String TEST_NAME = "DominoeGameBoard: Remove non-spinner as first played domino";
             Dominoe tempDom;
             EdgeLocation tempLoc;
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             tempDom = new Dominoe(2, 1);
             tempLoc = EdgeLocation.WEST;
@@ -954,9 +955,6 @@ public class FunctionalTesting {
             final String TEST_NAME = "DominoeGameBoard: Remove row domino from existing row";
             Dominoe tempDom;
             EdgeLocation tempLoc;
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Simply add the double, then play and remove one
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
@@ -995,9 +993,6 @@ public class FunctionalTesting {
             final String TEST_NAME = "DominoeGameBoard: Remove column domino from existing row";
             Dominoe tempDom;
             EdgeLocation tempLoc;
-
-            Logging.LogMsg(LogLevel.INFO, TAG, "");
-            Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_NAME);
 
             //Case: Simply add the double, then play and remove one
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
