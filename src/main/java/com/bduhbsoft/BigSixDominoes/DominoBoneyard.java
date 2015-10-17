@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
-/*
+/**
 * Class DominoBoneyard
 *
 * Implements the boneyard which holds the unused dominoes
