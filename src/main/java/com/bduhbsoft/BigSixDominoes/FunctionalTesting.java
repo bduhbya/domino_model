@@ -15,6 +15,8 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
 import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoeGameBoard.EdgeLocation;
+import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
+import com.bduhbsoft.BigSixDominoes.ScoreCardHouse.QuadState;
 
 /*
 * Class FunctionalTesting
@@ -146,6 +148,58 @@ public class FunctionalTesting {
         return success;
     }
 
+    //TODO: Finish
+    private boolean testAddHousePoints(ScoreCardHouse house, int[] addPoints, int[] expectedTtl, int[] expectedLeftOver,
+                                       boolean[] expectedFull, int[] quadLocation, ScoreCardHouse.QuadState[] expectedState,
+                                       boolean[] expectedHorizontal, boolean[] expectedVertical, ArrayList<String> messages, String testName) {
+        boolean success = true, isFull = false, horVert;
+        int leftOver;
+        QuadState[] curState;
+        String title = testName;
+
+        if(title == null) {
+            title = "No Test Name";
+        }
+
+        for(int idx = 0; idx < addPoints.length; idx++) {
+            leftOver = house.addPoints(addPoints[idx]);
+            if(leftOver != expectedLeftOver[idx]) {
+                success = false;
+                messages.add("Left over points: " + leftOver + " expected: " + expectedLeftOver[idx]);
+            }
+
+            isFull = house.isFull();
+            if(isFull != expectedFull[idx]) {
+                success = false;
+                messages.add("House full: " + isFull + " expected: " + expectedFull[idx]);
+            }
+
+            horVert = house.getHorizontalBase();
+            if(horVert != expectedHorizontal[idx]) {
+                success = false;
+                messages.add("Horizontal: " + horVert + ", expected: " + expectedHorizontal[idx]);
+            }
+
+            horVert = house.getVerticalBase();
+            if(horVert != expectedVertical[idx]) {
+                success = false;
+                messages.add("Vertical: " + horVert + ", expected: " + expectedVertical[idx]);
+            }
+
+            curState = house.getQuads();
+            if(curState[quadLocation[idx]] != expectedState[idx]) {
+                success = false;
+                messages.add("Quadrant " + quadLocation[idx] + ": " + curState[quadLocation[idx]] + ", expected: " + expectedState[idx]);
+            }
+        }
+
+        title += ": " + (success ? "SUCCESS" : "FAILED");
+        //TODO: Update board to draw houses
+//        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl, title);
+
+        return success;
+    }
+
     private boolean checkClassSuccess(boolean classScs, boolean caseScs) {
         return (classScs && caseScs);
     }
@@ -158,6 +212,8 @@ public class FunctionalTesting {
         if(!mRunGuiTests) {
             tempSuccess = testDominoGameBoard(this);
             if(success) success = tempSuccess;
+            tempSuccess = testScoreCardHouse(this);
+            if(success) success = tempSuccess;
         }
         tempSuccess = testDomino(this);
         if(success) success = tempSuccess;
@@ -169,6 +225,23 @@ public class FunctionalTesting {
         if(success) success = tempSuccess;
 
         return success;
+    }
+
+    public boolean testScoreCardHouse(FunctionalTesting test) {
+        boolean success = true;
+        final String TEST_CLASS_NAME = "ScoreCardHouse Class Tests";
+
+        Logging.LogMsg(LogLevel.INFO, TAG, "");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_CLASS_NAME);
+
+        test.resetTestMetrics();
+
+        for(IFunctionalTest curTest : mScoreCardHouseTests) {
+             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+        }
+
+        logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
+        return test.mTstClassSuccess;
     }
 
     public boolean testDominoGameBoard(FunctionalTesting test) {
@@ -545,6 +618,37 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             test.mTstClassSuccess = success;
+
+            return success;
+        }}
+    };
+
+    public static IFunctionalTest[] mScoreCardHouseTests = {
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            ScoreCardHouse house = new ScoreCardHouse();
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {ScoreCardHouse.MULTIPLE       };
+            int expectedTtl[]                        = new int[]                      {ScoreCardHouse.MULTIPLE       };
+            int expectedLeftOver[]                   = new int[]                      {0                             };
+            boolean expectedFull[]                   = new boolean[]                  {false                         };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                          };
+            boolean expectedVert[]                   = new boolean[]                  {false                         };
+            int quadLocation[]                       = new int[]                      {0                             };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty};
+            final String TEST_NAME = "ScoreCardHouse: Add " + ScoreCardHouse.MULTIPLE + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            //TODO: Add visual code for score card
+//            title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
+//            test.refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
 
             return success;
         }}

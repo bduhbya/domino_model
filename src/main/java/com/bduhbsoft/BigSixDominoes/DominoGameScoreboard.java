@@ -14,7 +14,7 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
  *
  * </p>
  *
- * Also implements the classic line and cirlce score tracking
+ * Also implements the classic line and circle score tracking
  * used when scoring domino games with pencil and paper which
  * avoids using tick marks or erasing or writing large columns of
  * numbers.
@@ -22,71 +22,19 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
 public class DominoGameScoreboard {
 
-    /**
-    * State of each house quadrant.
-    *
-    * </p>
-    *
-    * Each quadrant of a house can be either a single line (5 points),
-    * a cross/x (10 points) or a circle (10 points)
-    */ 
-    private enum QuadState {
-        Empty,
-        Line,
-        Cross,
-        Circle
-    }
-
-    /**
-    * Tracks the state of each house of a classic score board.
-    *
-    * </p>
-    *
-    * Each quadrant holds up to 10 points and the base lines of the house
-    * are worth 5 points each.  A house is worth 50 points when full.  The
-    * quadrants of the house are described the same way the quadrants of
-    * a Cartesian graph are described.
-    *
-    * </p>
-    *
-    * Each house fills up as points are added to
-    * a players score.  If a line is already drawn in a quadrant, then it
-    * can only transition to a cross.  If a quadrant is empty it can take
-    * either a line or a circle.
-    */
-    private class House {
-        private QuadState mQuadI;
-        private QuadState mQuadII;
-        private QuadState mQuadIII;
-        private QuadState mQuadIV;
-        private boolean mHorBase;
-        private boolean mVertBase;
-
-        /**
-        * Constructs empty house.
-        */
-        public House() {
-            mHorBase = false;
-            mVertBase = false;
-            mQuadI   = QuadState.Empty;
-            mQuadII  = QuadState.Empty;
-            mQuadIII = QuadState.Empty;
-            mQuadIV  = QuadState.Empty;
-        }
-    }
-
-    private Map<String, Integer> mPlayerScores;
-    private Map<String, ArrayList<House>> mPlayerScoreCards;
+    private Map<String, ArrayList<ScoreCardHouse>> mPlayerScoreCards;
 
     /**
     * Constructs score board.  Note, this should use the player username in case
     * display name changes
     */ 
     public DominoGameScoreboard(ArrayList<String> players) {
-        mPlayerScores = new HashMap<String, Integer>();
+        mPlayerScoreCards = new HashMap<String, ArrayList<ScoreCardHouse>>();
 
         for(String player : players) {
-            mPlayerScores.put(player, 0);
+            ArrayList<ScoreCardHouse> scoreCard = new ArrayList<ScoreCardHouse>();
+            scoreCard.add(new ScoreCardHouse());
+            mPlayerScoreCards.put(player, scoreCard);
         }
     }
 
@@ -97,9 +45,8 @@ public class DominoGameScoreboard {
     * the constructor
     */
     public void addPoints(String player, int points) {
-        //TODO: Throw exception if player is not found
         if(checkPlayer(player)) {
-            mPlayerScores.put(player, points);
+            addPlayerPoints(player, points);
         }
     }
 
@@ -108,17 +55,56 @@ public class DominoGameScoreboard {
     * in the board, throws exception
     */ 
     public int getPlayerPoints(String player) {
-        //TODO: Throw excpetion if player is not found
         if(checkPlayer(player)) {
-            return mPlayerScores.get(player);
+            return getPoints(player);
         }
 
         return -1;
     }
 
-    private boolean checkPlayer(String player) throws IndexOutOfBoundsException {
-        if(!mPlayerScores.containsKey(player)) {
-            throw new IndexOutOfBoundsException("Player not in list of configured players");
+    /**
+    * Returns the scorecard of a player.
+    *
+    * @return List of houses for a given player
+    */
+    public ArrayList<ScoreCardHouse> getPlayerScoreCardHouses(String player) {
+        if(checkPlayer(player)) {
+            return getScoreCardHouses(player);
+        }
+
+        return null;
+    }
+
+    private int getPoints(String player) {
+        ArrayList<ScoreCardHouse> scoreCard = getScoreCardHouses(player);
+        int points = 0;
+
+        for(ScoreCardHouse house : scoreCard) {
+            points += house.getPoints();
+        }
+
+        return points;
+    }
+
+    private ArrayList<ScoreCardHouse> getScoreCardHouses(String player) {
+        return mPlayerScoreCards.get(player);
+    }
+
+    private void addPlayerPoints(String player, int points) {
+        ArrayList<ScoreCardHouse> scoreCard = getScoreCardHouses(player);
+        int lastScoreCardHouse = scoreCard.size() - 1;
+        int leftOver = scoreCard.get(lastScoreCardHouse).addPoints(points);
+
+        while(leftOver > 0) {
+            ScoreCardHouse newScoreCardHouse = new ScoreCardHouse();
+            leftOver = newScoreCardHouse.addPoints(leftOver);
+            scoreCard.add(newScoreCardHouse);
+        }
+    }
+
+    private boolean checkPlayer(String player) {
+        if(!mPlayerScoreCards.containsKey(player)) {
+            return false;
         }
 
         return true;
