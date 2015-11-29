@@ -43,11 +43,16 @@ public class DominoGameScoreboard {
     *
     * @param player name of player that scored. MUST match player used in 
     * the constructor
+    *
+    * @return True if player found and points added, false otherwise
     */
-    public void addPoints(String player, int points) {
+    public boolean addPoints(String player, int points) {
+        boolean found = false;
         if(checkPlayer(player)) {
             addPlayerPoints(player, points);
+            found = true;
         }
+        return found;
     }
 
     /**
