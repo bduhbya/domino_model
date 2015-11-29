@@ -26,10 +26,11 @@ public class ScoreCardHouse {
     private int mPoints; //Numeric value of points
     private int mRemaining; //Remaining points in the house before full
     private int mCurQuad; //Current quadrant
+    private int mMultiple; //Configured multiple for a single score
+    private int mDoubleMultiple; //One quadrant holds twice the multiple value
+    private int mHouseFull; //Maximum points for a house
 
-    public static final int MULTIPLE = 5; //Built with multiples of 5
-    public static final int DBL_MULTIPLE = MULTIPLE * 2; //House quadrants hold at most twice the multiple
-    private static final int HOUSE_FULL = 50; //50 points per house
+    public static final int DEFAULT_MULTIPLE = 5; //Built with multiples of 5
     private static final String TAG = "ScoreCardHouse";
 
     /**
@@ -51,15 +52,30 @@ public class ScoreCardHouse {
     * Constructs empty house.
     */
     public ScoreCardHouse() {
+        mMultiple = DEFAULT_MULTIPLE;
+        initHouse();
+    }
+
+    /**
+    * Constructs empty house with non-default multiple.
+    */
+    public ScoreCardHouse(int multiple) {
+        mMultiple = multiple;
+        initHouse();
+    }
+
+    private void initHouse() {
         mHorBase = false;
         mVertBase = false;
         mQuads = new QuadState[4];
         for(int idx = 0; idx < mQuads.length; idx++) {
             mQuads[idx] = QuadState.Empty;
         }
+        mHouseFull = mMultiple * 10;
         mPoints = 0;
-        mRemaining = HOUSE_FULL;
         mCurQuad = 0;
+        mDoubleMultiple = mMultiple * 2;
+        mRemaining = mHouseFull;
     }
 
     /**
@@ -69,19 +85,22 @@ public class ScoreCardHouse {
     * @return Number of left over points
     */
     public int addPoints(int points) {
-        if((points % MULTIPLE) != 0) {
-            Logging.LogMsg(LogLevel.ERROR, TAG, "ScoreCardHouse::addPoints, point value: " + points + " not multiple of: " + MULTIPLE);
+        Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::addPoints, adding points: " + points + ".");
+        if((points % mMultiple) != 0) {
+            Logging.LogMsg(LogLevel.ERROR, TAG, "ScoreCardHouse::addPoints, point value: " + points + " not multiple of: " + mMultiple);
             return points;
         }
 
         int leftOver = 0;
         if(points > mRemaining) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::addPoints, points: " + points + ", greater than remaining: " + mRemaining);
             leftOver = points - mRemaining;
             points = mRemaining;
         }
 
         buildHouse(points);
         mPoints += points;
+        mRemaining -= points;
 
         return leftOver;
     }
@@ -114,6 +133,15 @@ public class ScoreCardHouse {
     }
 
     /**
+    * Gets configured multiple
+    *
+    * @return The configured multiple of the house
+    */
+    public int getMultiple() {
+        return mMultiple;
+    }
+
+    /**
     * Gets quadrants of the house.
     *
     * @return Quadrants of the house
@@ -128,35 +156,51 @@ public class ScoreCardHouse {
     * @return True if house is full and false otherwise
     */
     public boolean isFull() {
-        return mPoints == HOUSE_FULL;
+        return mPoints == mHouseFull;
+    }
+
+    /**
+    * Returns maximum points house can hold.
+    *
+    * @return The number of points this can hold in total
+    */
+    public int getMaxPoints() {
+        return mHouseFull;
     }
 
     private void buildHouse(int points) {
+        Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse");
         if(!mHorBase) {
             mHorBase = true;
-            points -= MULTIPLE;
+            points -= mMultiple;
+            Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, built horizontal line");
         }
 
         if(!mVertBase && points > 0) {
             mVertBase = true;
-            points -= MULTIPLE;
+            points -= mMultiple;
+            Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, built vertical line");
         }
 
         while(points > 0) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, before processing " + points + " points, current state " + getState());
             switch(mQuads[mCurQuad]) {
                 case Empty:
-                    if(points >= DBL_MULTIPLE) {
+                    if(points >= mDoubleMultiple) {
+                        Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, case Q" + mCurQuad + ": EMPTY, points: " + points + " >= " + mDoubleMultiple);
                         mQuads[mCurQuad] = QuadState.Circle;
-                        points -= DBL_MULTIPLE;
+                        points -= mDoubleMultiple;
                         mCurQuad++;
                     } else {
+                        Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, case Q" + mCurQuad + ": EMPTY, points: " + points + " >= " + mMultiple);
                         mQuads[mCurQuad] = QuadState.Line;
-                        points -= MULTIPLE;
+                        points -= mMultiple;
                     }
                     break;
                 case Line:
+                    Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, case Q" + mCurQuad + ": Line, points: " + points + " >= " + mMultiple);
                     mQuads[mCurQuad] = QuadState.Cross;
-                    points -= MULTIPLE;
+                    points -= mMultiple;
                     mCurQuad++;
                     break;
                 //Should never reach here
@@ -166,6 +210,20 @@ public class ScoreCardHouse {
                     //TODO: Error processing, maybe throw exception
                     break;
             }
+            Logging.LogMsg(LogLevel.TRACE, TAG, "ScoreCardHouse::buildHouse, after processing, current state " + getState());
+            Logging.LogMsg(LogLevel.TRACE, TAG, "");
         }
+        Logging.LogMsg(LogLevel.TRACE, TAG, "");
+    }
+
+    private String getState() {
+        String state = "Points: " + mPoints;
+
+        state += " - H>" + mHorBase + " - V>" + mVertBase;
+        for(int idx = 0; idx < mQuads.length; idx++) {
+            state += " - Q" + idx + "[" + mQuads[idx] + "]";
+        }
+
+        return state;
     }
 }

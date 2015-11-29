@@ -151,14 +151,19 @@ public class FunctionalTesting {
     //TODO: Finish
     private boolean testAddHousePoints(ScoreCardHouse house, int[] addPoints, int[] expectedTtl, int[] expectedLeftOver,
                                        boolean[] expectedFull, int[] quadLocation, ScoreCardHouse.QuadState[] expectedState,
-                                       boolean[] expectedHorizontal, boolean[] expectedVertical, ArrayList<String> messages, String testName) {
+                                       boolean[] expectedHorizontal, boolean[] expectedVertical, int expectedMultiple, ArrayList<String> messages, String testName) {
         boolean success = true, isFull = false, horVert;
-        int leftOver;
+        int leftOver, total;
         QuadState[] curState;
         String title = testName;
 
         if(title == null) {
             title = "No Test Name";
+        }
+
+        if(expectedMultiple != house.getMultiple()) {
+            success = false;
+            messages.add("Actual multiple: " + house.getMultiple() + ", expected: " + expectedMultiple);
         }
 
         for(int idx = 0; idx < addPoints.length; idx++) {
@@ -190,6 +195,12 @@ public class FunctionalTesting {
             if(curState[quadLocation[idx]] != expectedState[idx]) {
                 success = false;
                 messages.add("Quadrant " + quadLocation[idx] + ": " + curState[quadLocation[idx]] + ", expected: " + expectedState[idx]);
+            }
+
+            total = house.getPoints();
+            if(total != expectedTtl[idx]) {
+                success = false;
+                messages.add("Point total: " + total + ", expected: " + expectedTtl[idx]);
             }
         }
 
@@ -627,31 +638,450 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE; //Use default ctor here and pass in multiple for remaining tests
             ScoreCardHouse house = new ScoreCardHouse();
             ArrayList<String> messages = new ArrayList<String>();
-            int curPoints[]                          = new int[]                      {ScoreCardHouse.MULTIPLE       };
-            int expectedTtl[]                        = new int[]                      {ScoreCardHouse.MULTIPLE       };
-            int expectedLeftOver[]                   = new int[]                      {0                             };
-            boolean expectedFull[]                   = new boolean[]                  {false                         };
-            boolean expectedHoriz[]                  = new boolean[]                  {true                          };
-            boolean expectedVert[]                   = new boolean[]                  {false                         };
-            int quadLocation[]                       = new int[]                      {0                             };
-            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty};
-            final String TEST_NAME = "ScoreCardHouse: Add " + ScoreCardHouse.MULTIPLE + " points";
+            int curPoints[]                          = new int[]                      {ScoreCardHouse.DEFAULT_MULTIPLE};
+            int expectedTtl[]                        = new int[]                      {ScoreCardHouse.DEFAULT_MULTIPLE};
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {false                          };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {false                          };
+            int quadLocation[]                       = new int[]                      {0                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty };
+            final String TEST_NAME = "ScoreCardHouse: Add " + ScoreCardHouse.DEFAULT_MULTIPLE + " points";
             String title;
 
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
-                                              quadLocation, expectedState, expectedHoriz, expectedVert, messages, TEST_NAME);
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             test.mTstClassSuccess = success;
 
-            //TODO: Add visual code for score card
-//            title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
-//            test.refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple*2               };
+            int expectedTtl[]                        = new int[]                      {usingMultiple*2               };
+            int expectedLeftOver[]                   = new int[]                      {0                             };
+            boolean expectedFull[]                   = new boolean[]                  {false                         };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                          };
+            boolean expectedVert[]                   = new boolean[]                  {true                          };
+            int quadLocation[]                       = new int[]                      {0                             };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty};
+            final String TEST_NAME = "ScoreCardHouse: Add " + usingMultiple*2 + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple*3              };
+            int expectedTtl[]                        = new int[]                      {usingMultiple*3              };
+            int expectedLeftOver[]                   = new int[]                      {0                            };
+            boolean expectedFull[]                   = new boolean[]                  {false                        };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         };
+            boolean expectedVert[]                   = new boolean[]                  {true                         };
+            int quadLocation[]                       = new int[]                      {0                            };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line};
+            final String TEST_NAME = "ScoreCardHouse: Add " + usingMultiple*3 + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple*4                };
+            int expectedTtl[]                        = new int[]                      {usingMultiple*4                };
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {false                          };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {true                           };
+            int quadLocation[]                       = new int[]                      {0                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Circle};
+            final String TEST_NAME = "ScoreCardHouse: Add " + usingMultiple*4 + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple*3              , usingMultiple                 };
+            int expectedTtl[]                        = new int[]                      {usingMultiple*3              , usingMultiple*4               };
+            int expectedLeftOver[]                   = new int[]                      {0                            , 0                             };
+            boolean expectedFull[]                   = new boolean[]                  {false                        , false                         };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         , true                          };
+            boolean expectedVert[]                   = new boolean[]                  {true                         , true                          };
+            int quadLocation[]                       = new int[]                      {0                            , 0                             };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line, ScoreCardHouse.QuadState.Cross};
+            final String TEST_NAME = "ScoreCardHouse: Add points twice, making cross at quad 0";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple                 , usingMultiple                 ,
+                                                                                       usingMultiple                 , usingMultiple                 ,
+                                                                                       usingMultiple                 , usingMultiple                 ,
+                                                                                       usingMultiple                 , usingMultiple                 ,
+                                                                                       usingMultiple                 , usingMultiple                  };
+
+            int expectedTtl[]                        = new int[]                      {usingMultiple                 , usingMultiple*2               ,
+                                                                                       usingMultiple*3               , usingMultiple*4               ,
+                                                                                       usingMultiple*5               , usingMultiple*6               ,
+                                                                                       usingMultiple*7               , usingMultiple*8               ,
+                                                                                       usingMultiple*9               , usingMultiple*10                };
+
+            int expectedLeftOver[]                   = new int[]                      {0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       0                             , 0                               };
+
+            boolean expectedFull[]                   = new boolean[]                  {false                         , false                         ,
+                                                                                       false                         , false                         ,
+                                                                                       false                         , false                         ,
+                                                                                       false                         , false                         ,
+                                                                                       false                         , true                            };
+
+            boolean expectedHoriz[]                  = new boolean[]                  {true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                            };
+
+            boolean expectedVert[]                   = new boolean[]                  {false                         , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                            };
+
+            int quadLocation[]                       = new int[]                      {0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       1                             , 1                             ,
+                                                                                       2                             , 2                             ,
+                                                                                       3                             , 3                               };
+
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty, ScoreCardHouse.QuadState.Empty,
+                                                                                       ScoreCardHouse.QuadState.Line , ScoreCardHouse.QuadState.Cross,
+                                                                                       ScoreCardHouse.QuadState.Line , ScoreCardHouse.QuadState.Cross,
+                                                                                       ScoreCardHouse.QuadState.Line , ScoreCardHouse.QuadState.Cross,
+                                                                                       ScoreCardHouse.QuadState.Line , ScoreCardHouse.QuadState.Cross  };
+            final String TEST_NAME = "ScoreCardHouse: Add 5 points until full";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {usingMultiple*2               , usingMultiple*2               ,
+                                                                                       usingMultiple*2               , usingMultiple*2               ,
+                                                                                       usingMultiple*2               , usingMultiple*2                 };
+
+            int expectedTtl[]                        = new int[]                      {usingMultiple*2               , usingMultiple*4               ,
+                                                                                       usingMultiple*6               , usingMultiple*8               ,
+                                                                                       usingMultiple*10              , usingMultiple*10                };
+
+            int expectedLeftOver[]                   = new int[]                      {0                             , 0                             ,
+                                                                                       0                             , 0                             ,
+                                                                                       0                             , usingMultiple*2                 };
+
+            boolean expectedFull[]                   = new boolean[]                  {false                         , false                         ,
+                                                                                       false                         , false                         ,
+                                                                                       true                          , true                            };
+
+            boolean expectedHoriz[]                  = new boolean[]                  {true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                            };
+
+            boolean expectedVert[]                   = new boolean[]                  {true                          , true                          ,
+                                                                                       true                          , true                          ,
+                                                                                       true                          , true                            };
+
+            int quadLocation[]                       = new int[]                      {0                             , 0                             ,
+                                                                                       1                             , 2                             ,
+                                                                                       3                             , 3                               };
+
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Empty , ScoreCardHouse.QuadState.Circle,
+                                                                                       ScoreCardHouse.QuadState.Circle, ScoreCardHouse.QuadState.Circle,
+                                                                                       ScoreCardHouse.QuadState.Circle, ScoreCardHouse.QuadState.Circle  };
+            final String TEST_NAME = "ScoreCardHouse: Add " + usingMultiple*2 + " points until full";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 3;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                 };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                 };
+            int expectedLeftOver[]                   = new int[]                      {0                            };
+            boolean expectedFull[]                   = new boolean[]                  {false                        };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         };
+            boolean expectedVert[]                   = new boolean[]                  {true                         };
+            int quadLocation[]                       = new int[]                      {0                            };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 4;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                   };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                   };
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {false                          };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {true                           };
+            int quadLocation[]                       = new int[]                      {0                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Circle};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 5;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                 };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                 };
+            int expectedLeftOver[]                   = new int[]                      {0                            };
+            boolean expectedFull[]                   = new boolean[]                  {false                        };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         };
+            boolean expectedVert[]                   = new boolean[]                  {true                         };
+            int quadLocation[]                       = new int[]                      {1                            };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 6;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                   };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                   };
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {false                          };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {true                           };
+            int quadLocation[]                       = new int[]                      {1                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Circle};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 7;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                 };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                 };
+            int expectedLeftOver[]                   = new int[]                      {0                            };
+            boolean expectedFull[]                   = new boolean[]                  {false                        };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         };
+            boolean expectedVert[]                   = new boolean[]                  {true                         };
+            int quadLocation[]                       = new int[]                      {2                            };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 8;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                   };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                   };
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {false                          };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {true                           };
+            int quadLocation[]                       = new int[]                      {2                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Circle};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 9;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                 };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                 };
+            int expectedLeftOver[]                   = new int[]                      {0                            };
+            boolean expectedFull[]                   = new boolean[]                  {false                        };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                         };
+            boolean expectedVert[]                   = new boolean[]                  {true                         };
+            int quadLocation[]                       = new int[]                      {3                            };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Line};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            int oneTimePoint = usingMultiple * 10;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple);
+            ArrayList<String> messages = new ArrayList<String>();
+            int curPoints[]                          = new int[]                      {oneTimePoint                   };
+            int expectedTtl[]                        = new int[]                      {oneTimePoint                   };
+            int expectedLeftOver[]                   = new int[]                      {0                              };
+            boolean expectedFull[]                   = new boolean[]                  {true                           };
+            boolean expectedHoriz[]                  = new boolean[]                  {true                           };
+            boolean expectedVert[]                   = new boolean[]                  {true                           };
+            int quadLocation[]                       = new int[]                      {3                              };
+            ScoreCardHouse.QuadState expectedState[] = new ScoreCardHouse.QuadState[] {ScoreCardHouse.QuadState.Circle};
+            final String TEST_NAME = "ScoreCardHouse: Add " + oneTimePoint + " points";
+            String title;
+
+            success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
+                                              quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            test.mTstClassSuccess = success;
 
             return success;
         }}
+
     };
 
     public static IFunctionalTest[] mGameBoardTests = {
