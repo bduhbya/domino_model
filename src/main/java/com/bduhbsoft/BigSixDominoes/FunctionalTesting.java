@@ -44,6 +44,7 @@ public class FunctionalTesting {
     private final static String LOG_LEVEL_INFO = LOG_OPT + "=info";
     private final static String LOG_LEVEL_ERROR = LOG_OPT + "=error";
     private final static Map<String, LogLevel> LOG_MAP = new HashMap<>();
+    public final static String BAD_PLAYER = "Bad player name!";
 
     private JFrame mApplication;
     private GameBoardGraphicsPanel mPanel;
@@ -207,28 +208,46 @@ public class FunctionalTesting {
         return success;
     }
 
-    private boolean testScoreCardAddPoints(DominoGameScoreboard scoreCard, int[] addPoints, String[] player, int[] expectedTtl,
-                                           boolean[] expectedSuccess, ArrayList<String> messages, String testName) {
+    private boolean testScoreCardAddPoints(DominoGameScoreboard scoreCard, int[] addPoints, String[] player, int expectedPlayerCount, int[] expectedTtl,
+                                           boolean[] expectedSuccess, ArrayList<ScoreCardHouse> houses, ArrayList<String> messages, String testName) {
         boolean success = true, tempSuccess = true;
         int total;
         String title = testName;
+        String lastPlayer = "";
 
         if(title == null) {
             title = "No Test Name";
         }
 
         for(int idx = 0; idx < addPoints.length; idx++) {
-            tempSuccess = scoreCard.addPoints(player[idx], addPoints[idx]);
+            lastPlayer = player[idx];
+            tempSuccess = scoreCard.addPoints(lastPlayer, addPoints[idx]);
             if(tempSuccess != expectedSuccess[idx]) {
                 success = false;
                 messages.add(tempSuccess ? "ABLE" : "NOT ABLE" + " to add points " + addPoints[idx] + "for player: " + 
-                             player[idx] + ", expected: " + (expectedSuccess[idx] ? "SUCCESS" : "FAILURE"));
+                             lastPlayer + ", expected: " + (expectedSuccess[idx] ? "SUCCESS" : "FAILURE"));
             }
 
-            total = scoreCard.getPlayerPoints(player[idx]);
+            total = scoreCard.getPlayerPoints(lastPlayer);
             if(total != expectedTtl[idx]) {
                 success = false;
-                messages.add("Got " + total + " for player: " + player[idx] + ", expected: " + expectedTtl[idx]);
+                messages.add("Got " + total + " for player: " + lastPlayer + ", expected: " + expectedTtl[idx]);
+            }
+        }
+
+        total = scoreCard.getNumPlayers();
+        if(total != expectedPlayerCount) {
+            success = false;
+            messages.add("Found: " + total + ", players.  Expexted: " + expectedPlayerCount);
+        }
+
+        if(houses != null) {
+            for(int idx = 0; idx < houses.size(); idx++) {
+                if(!houses.get(idx).equals(scoreCard.getPlayerScoreCardHouses(lastPlayer).get(idx))) {
+                    success = false;
+                    messages.add("House " + idx + ", in score card shows: " + scoreCard.getPlayerScoreCardHouses(lastPlayer).get(idx) +
+                                 ", expected: " + houses.get(idx));
+                }
             }
         }
 
@@ -237,7 +256,7 @@ public class FunctionalTesting {
         return success;
     }
 
-    private boolean checkClassSuccess(boolean classScs, boolean caseScs) {
+    private boolean checkGroupSuccess(boolean classScs, boolean caseScs) {
         return (classScs && caseScs);
     }
 
@@ -277,7 +296,7 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mDominoGameScoreboardTests) {
-             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+             test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
         logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
@@ -294,7 +313,7 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mScoreCardHouseTests) {
-             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+             test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
         logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
@@ -311,7 +330,7 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mGameBoardTests) {
-             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+             test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
         logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
@@ -328,7 +347,7 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mGameOptionsTests) {
-             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+             test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
         logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
@@ -373,7 +392,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoePlayer: New player object", messages, passFailCtr);
 
         //Case set isMyTurn
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -387,7 +406,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoePlayer: Set player turn status", messages, passFailCtr);
 
         //Case set setScore
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -400,7 +419,7 @@ public class FunctionalTesting {
 
         logSuccess(success, "DominoePlayer: Set player score", messages, passFailCtr);
 
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
 
         return tstClassSuccess;
@@ -436,7 +455,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoBoneyard: New empty boneyard", messages, passFailCtr);
 
         //Case set yard populates the bone yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -455,7 +474,7 @@ public class FunctionalTesting {
         }
 
         //Case wash the bone yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         success = false;
         messages.clear();
 
@@ -508,7 +527,7 @@ public class FunctionalTesting {
         logSuccess(success, "DominoBoneyard: wash the yard", messages, passFailCtr);
 
         //Case remove a domino from the yard
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         success = true;
         messages.clear();
 
@@ -526,7 +545,7 @@ public class FunctionalTesting {
 
         logSuccess(success, "DominoBoneyard: remove domino from the yard", messages, passFailCtr);
 
-        tstClassSuccess = checkClassSuccess(tstClassSuccess, success);
+        tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
         return tstClassSuccess;
     }
@@ -541,7 +560,7 @@ public class FunctionalTesting {
         test.resetTestMetrics();
 
         for(IFunctionalTest curTest : mDominoTests) {
-             test.mTstClassSuccess = checkClassSuccess(test.mTstClassSuccess, curTest.runTest(test));
+             test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
         logSummary(TEST_CLASS_NAME, test.mTstClassSuccess, test.mPassFailCtr);
@@ -674,12 +693,11 @@ public class FunctionalTesting {
 
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }}
     };
 
+    //DominoGameScoreboard test bodies
     public static IFunctionalTest[] mDominoGameScoreboardTests = {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
@@ -688,24 +706,184 @@ public class FunctionalTesting {
             ArrayList<String> gamePlayers = new ArrayList<>();
             gamePlayers.add(player1);
             gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
             DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {5      };
             String players[]          = new String[]  {player1};
             int expectedTtl[]         = new int[]     {5      };
             boolean expectedSuccess[] = new boolean[] {true   };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
             final String TEST_NAME = "DominoGameScoreboard: Add points for valid player";
-            String title;
 
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, expectedTtl, expectedSuccess, messages, TEST_NAME);
+            expectedHouses.add(new ScoreCardHouse(usingMultiple));
+            expectedHouses.get(0).addPoints(addPoints[addPoints.length-1]);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {5         };
+            String players[]          = new String[]  {BAD_PLAYER};
+            int expectedTtl[]         = new int[]     {-1        };
+            boolean expectedSuccess[] = new boolean[] {false     };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add points for invalid player";
+
+            expectedHouses = null;
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {5      , 10     };
+            String players[]          = new String[]  {player1, player2};
+            int expectedTtl[]         = new int[]     {5      , 10     };
+            boolean expectedSuccess[] = new boolean[] {true   , true   };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add points for two valid players";
+
+            expectedHouses.add(new ScoreCardHouse(usingMultiple));
+            expectedHouses.get(0).addPoints(expectedTtl[expectedTtl.length-1]);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple+2};
+            String players[]          = new String[]  {player1        , player2        };
+            int expectedTtl[]         = new int[]     {0              , 0              };
+            boolean expectedSuccess[] = new boolean[] {true           , true           };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add non-scoring points for two valid players";
+
+            expectedHouses.add(new ScoreCardHouse(usingMultiple));
+            expectedHouses.get(0).addPoints(expectedTtl[expectedTtl.length-1]);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple*11};
+            String players[]          = new String[]  {player1        , player2         };
+            int expectedTtl[]         = new int[]     {0              , usingMultiple*11};
+            boolean expectedSuccess[] = new boolean[] {true           , true            };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add two-house score for one player in one play";
+
+            int leftOver = expectedTtl[expectedTtl.length-1];
+            int curHouse = 0;
+            do {
+                expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                curHouse++;
+            } while(leftOver > 0);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple*21};
+            String players[]          = new String[]  {player1        , player2         };
+            int expectedTtl[]         = new int[]     {0              , usingMultiple*21};
+            boolean expectedSuccess[] = new boolean[] {true           , true            };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add three house score for one player in one play";
+
+            int leftOver = expectedTtl[expectedTtl.length-1];
+            int curHouse = 0;
+            do {
+                expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                curHouse++;
+            } while(leftOver > 0);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple, usingMultiple*5, usingMultiple*5 , usingMultiple*5 , usingMultiple*5 };
+            String players[]          = new String[]  {player2      , player2        , player2         , player2         , player2         };
+            int expectedTtl[]         = new int[]     {usingMultiple, usingMultiple*6, usingMultiple*11, usingMultiple*16, usingMultiple*21};
+            boolean expectedSuccess[] = new boolean[] {true         , true           , true            , true            , true            };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add three house score for one player in multiple plays";
+
+            int leftOver = expectedTtl[expectedTtl.length-1];
+            int curHouse = 0;
+            do {
+                expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                curHouse++;
+            } while(leftOver > 0);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
         }}
     };
 
+    //ScoreCardHouse test bodies
     public static IFunctionalTest[] mScoreCardHouseTests = {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
@@ -727,8 +905,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -753,8 +929,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -777,8 +951,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -803,8 +975,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -827,8 +997,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -893,8 +1061,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -941,8 +1107,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -966,8 +1130,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -993,8 +1155,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -1018,8 +1178,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -1045,8 +1203,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -1070,8 +1226,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -1097,8 +1251,6 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
-
             return success;
         }},
 
@@ -1122,8 +1274,6 @@ public class FunctionalTesting {
             success = test.testAddHousePoints(house, curPoints, expectedTtl, expectedLeftOver, expectedFull,
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             return success;
         }},
@@ -1149,12 +1299,51 @@ public class FunctionalTesting {
                                               quadLocation, expectedState, expectedHoriz, expectedVert, usingMultiple, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
-            test.mTstClassSuccess = success;
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ArrayList<String> messages = new ArrayList<String>();
+            int points = usingMultiple * 3;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple), house2 = new ScoreCardHouse(usingMultiple);
+            final String TEST_NAME = "ScoreCardHouse: Test equals function with equal houses";
+            String title;
+
+            house.addPoints(points);
+            house2.addPoints(points);
+            success = house.equals(house2);
+            if(!success) {
+                messages.add("Houses not equal, expected equal.  House1: " + house.toString() + ", house2: " + house2.toString());
+            }
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            ArrayList<String> messages = new ArrayList<String>();
+            int points = usingMultiple * 3;
+            ScoreCardHouse house = new ScoreCardHouse(usingMultiple), house2 = new ScoreCardHouse(usingMultiple);
+            final String TEST_NAME = "ScoreCardHouse: Test equals function with non-equal houses";
+            String title;
+
+            house.addPoints(points);
+            house2.addPoints(points + usingMultiple);
+            success = !house.equals(house2);
+            if(!success) {
+                messages.add("Houses equal, expected enot qual.  House1: " + house.toString() + ", house2: " + house2.toString());
+            }
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
         }}
     };
 
+    //GameBoard test bodies
     public static IFunctionalTest[] mGameBoardTests = {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
@@ -1226,8 +1415,6 @@ public class FunctionalTesting {
             }
 
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
-
-            test.mTstClassSuccess = success;
 
             title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
             test.refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
@@ -1627,8 +1814,6 @@ public class FunctionalTesting {
         }}
     };
 
-
-
     //Handler for clicking next game board test button
     class GameBoardBtnActionListener implements ActionListener {
         FunctionalTesting mTest;
@@ -1644,7 +1829,7 @@ public class FunctionalTesting {
                 mTest.resetTestMetrics();
             }
 
-            mTest.mTstClassSuccess = checkClassSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
+            mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
             mTest.mCurEventBasedFunctionalTest++;
 
             if(mTest.mCurEventBasedFunctionalTest == FunctionalTesting.mGameBoardTests.length) {

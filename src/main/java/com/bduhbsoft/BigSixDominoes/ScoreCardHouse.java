@@ -82,6 +82,8 @@ public class ScoreCardHouse {
     * Adds points to the house.  If the house cannot take all of the points, it
     * returns the left over points.
     *
+    * @param points Number of points to add.
+    *
     * @return Number of left over points
     */
     public int addPoints(int points) {
@@ -166,6 +168,27 @@ public class ScoreCardHouse {
     */
     public int getMaxPoints() {
         return mHouseFull;
+    }
+
+    /**
+    * Determines if one house is equal to another house in terms
+    * of line/circle/cross patterns
+    *
+    * @param house Other house to check
+    *
+    * @return True if other house is equal this house, false otherwise
+    */
+    public boolean equals(ScoreCardHouse house) {
+        for(int idx = 0; idx < mQuads.length; idx++) {
+            if(this.mQuads[idx] != house.mQuads[idx])
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return getState();
     }
 
     private void buildHouse(int points) {
