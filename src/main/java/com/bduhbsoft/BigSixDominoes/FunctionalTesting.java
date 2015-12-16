@@ -44,18 +44,21 @@ public class FunctionalTesting {
     private final static String LOG_LEVEL_INFO = LOG_OPT + "=info";
     private final static String LOG_LEVEL_ERROR = LOG_OPT + "=error";
     private final static Map<String, LogLevel> LOG_MAP = new HashMap<>();
+    private static ArrayList<IFunctionalTest[]> mGuiTests = new ArrayList<>();
     public final static String BAD_PLAYER = "Bad player name!";
 
     private JFrame mApplication;
     private GameBoardGraphicsPanel mPanel;
-    private JButton mNextGameBrdTestBtn;
-    private GameBoardBtnActionListener mNextGameBrdTestListener;
+    private JButton mNextVisualTestBtn;
+    private VisualTestBtnActionListener mNextVisualTestListener;
+    private int mCurEventBasedFunctionalTestGroup;
     private int mCurEventBasedFunctionalTest;
     private int[] mPassFailCtr;
     private boolean mTstClassSuccess;
     private boolean mRunGuiTests;
 
     public FunctionalTesting() {
+        mCurEventBasedFunctionalTestGroup = 0;
         mCurEventBasedFunctionalTest = 0;
         mPassFailCtr = new int[PASS_FAIL_CNDS];
         mRunGuiTests = false;
@@ -1815,10 +1818,10 @@ public class FunctionalTesting {
     };
 
     //Handler for clicking next game board test button
-    class GameBoardBtnActionListener implements ActionListener {
+    class VisualTestBtnActionListener implements ActionListener {
         FunctionalTesting mTest;
 
-        GameBoardBtnActionListener(FunctionalTesting test) {
+        VisualTestBtnActionListener(FunctionalTesting test) {
             mTest = test;
         }
 
@@ -1829,11 +1832,13 @@ public class FunctionalTesting {
                 mTest.resetTestMetrics();
             }
 
-            mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
+            mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess,
+                FunctionalTesting.mGuiTests.get(mCurEventBasedFunctionalTestGroup)[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
+//            mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
             mTest.mCurEventBasedFunctionalTest++;
 
             if(mTest.mCurEventBasedFunctionalTest == FunctionalTesting.mGameBoardTests.length) {
-                mTest.mNextGameBrdTestBtn.setEnabled(false);
+                mTest.mNextVisualTestBtn.setEnabled(false);
                 logSummary(TEST_BOARD_CLASS, mTest.mTstClassSuccess, mTest.mPassFailCtr);
                 mTest.mCurEventBasedFunctionalTest = 0;
             }
@@ -1844,14 +1849,14 @@ public class FunctionalTesting {
         if(mRunGuiTests) {
             this.mPanel = new GameBoardGraphicsPanel();
             this.mApplication = new JFrame();
-            this.mNextGameBrdTestListener = new GameBoardBtnActionListener(this);
-            this.mNextGameBrdTestBtn = new JButton("Next GameBoard Test");
-            this.mNextGameBrdTestBtn.addActionListener(mNextGameBrdTestListener);
+            this.mNextVisualTestListener = new VisualTestBtnActionListener(this);
+            this.mNextVisualTestBtn = new JButton("Next Visual Test");
+            this.mNextVisualTestBtn.addActionListener(mNextVisualTestListener);
 
             this.mApplication.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.mApplication.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
             this.mApplication.add(this.mPanel, BorderLayout.CENTER);
-            this.mApplication.add(this.mNextGameBrdTestBtn, BorderLayout.SOUTH);
+            this.mApplication.add(this.mNextVisualTestBtn, BorderLayout.SOUTH);
             this.mApplication.setVisible(true);
         }
     }
@@ -1868,6 +1873,12 @@ public class FunctionalTesting {
             }
         }
     }
+
+    static {
+        mGuiTests.add(mGameBoardTests);
+        mGuiTests.add(mDominoGameScoreboardTests);
+    }
+
 
     public static void main(String[] args) {
         FunctionalTesting test = new FunctionalTesting();

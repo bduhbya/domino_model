@@ -15,6 +15,8 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
 import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoeGameBoard.EdgeLocation;
+import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
+import com.bduhbsoft.BigSixDominoes.DominoGameScoreboard;
 
 /*
 * Class GameBoardGraphicsPanel
@@ -25,6 +27,8 @@ import com.bduhbsoft.BigSixDominoes.DominoeGameBoard.EdgeLocation;
 */
 
 class GameBoardGraphicsPanel extends JPanel {
+
+    //****************** Domino Drawing Data **********************************
 
     private static final int mFaceW = 30;
     private static final int mFaceH = 30;
@@ -63,8 +67,33 @@ class GameBoardGraphicsPanel extends JPanel {
     private ArrayList<Dominoe> mCol;
     private Dominoe mSpinner;
     private int mPoints;
-    private String mTitle;
 
+    //******************** Scorecard Drawing Data ****************************
+    private DominoGameScoreboard mScoreboard;
+    private static final int mHouseElementThickness = 2;
+    private static final int mCircleRadius = 5;
+    private static final int mCrossWidth = mCircleRadius*2;
+    private static final int mHouseElementSpace = 2;
+    private static final int mHouseBaseLineLength = ((mHouseElementSpace + mCrossWidth + mHouseElementSpace) * 2) + mHouseElementThickness;
+    private static final int mHouseSpacing = 4;
+    private static final int mLaneSpacing = 4; //Space between the side of a house and the column of that player's lane
+    private static final int mLaneWidth = mLaneSpacing*2 + mHouseBaseLineLength;
+
+    //******************** General Data ***************************************
+
+    private String mTitle;
+    private DrawingElement mDraw;
+
+    enum DrawingElement {
+        DrawingGameBoard,
+        DrawingScorecard,
+        DrawingGameBoardAndScorecard,
+        DrawingNone
+    }
+
+    /**
+    * GameBoardGraphicsPanel constructor.  Basic setup.
+    */
     public GameBoardGraphicsPanel()
     {
         super();
@@ -72,8 +101,13 @@ class GameBoardGraphicsPanel extends JPanel {
         mRow = null;
         mCol = null;
         mSpinner = null;
+        mDraw = DrawingElement.DrawingNone;
     }
 
+    /**
+    * Draws currently configured visuals
+    */
+    @Override
     public void paintComponent(Graphics g)
     {
         int width = getWidth();
@@ -81,7 +115,17 @@ class GameBoardGraphicsPanel extends JPanel {
 
         super.paintComponent(g);
 
-        drawDomBoard(g);
+        switch(mDraw) {
+            case DrawingGameBoard:
+                drawDomBoard(g);
+                break;
+
+            case DrawingScorecard:
+                break;
+
+            default:
+                Logging.LogMsg(LogLevel.TRACE, TAG, "paintComponent, no-op.  mDraw: " + mDraw);
+        }
     }
 
     public void setBoard(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
@@ -89,10 +133,16 @@ class GameBoardGraphicsPanel extends JPanel {
         mCol = col;
         mSpinner = spinner;
         mPoints = points;
+        mDraw = DrawingElement.DrawingGameBoard;
     }
 
     public void setTitle(String title) {
         mTitle = title;
+    }
+
+    public void setScorecard(DominoGameScoreboard scoreboard) {
+        mScoreboard = scoreboard;
+        mDraw = DrawingElement.DrawingScorecard;
     }
 
     private int[] getRowX(int width) {
