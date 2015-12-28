@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
@@ -70,19 +71,35 @@ class GameBoardGraphicsPanel extends JPanel {
 
     //******************** Scorecard Drawing Data ****************************
     private DominoGameScoreboard mScoreboard;
-    private static final int mHouseElementThickness = 2;
-    private static final int mCircleRadius = 5;
-    private static final int mCrossWidth = mCircleRadius*2;
-    private static final int mHouseElementSpace = 2;
-    private static final int mHouseBaseLineLength = ((mHouseElementSpace + mCrossWidth + mHouseElementSpace) * 2) + mHouseElementThickness;
-    private static final int mHouseSpacing = 4;
-    private static final int mLaneSpacing = 4; //Space between the side of a house and the column of that player's lane
-    private static final int mLaneWidth = mLaneSpacing*2 + mHouseBaseLineLength;
+    private static final int HOUSE_ELEMENT_THICKNESS = 2; //Line thickness
+    private static final int CIRCLE_RADIUS = 10; //For circle elements
+    private static final int CIRCLE_DIAMETER = CIRCLE_RADIUS * 2;
+    private static final int CROSS_WIDTH = CIRCLE_DIAMETER; //Width of cross element
+    private static final int HOUSE_ELEMENT_SPACE = 3; //Space between elements in a house and the hor/ver base lines
+    private static final int HOUSE_BASE_THICKNESS = 3; //Thickness of base lines of the house
+    private static final int HOUSE_BASE_THICKNESS_2 = HOUSE_BASE_THICKNESS / 2; //Thickness of base lines of the house
+//    private static final int HOUSE_BASELINE_LENGTH = ((HOUSE_ELEMENT_SPACE + CROSS_WIDTH + HOUSE_ELEMENT_SPACE) * 2) + HOUSE_ELEMENT_THICKNESS;
+    private static final int HOUSE_BASELINE_LENGTH = ((HOUSE_ELEMENT_SPACE * 2 + CROSS_WIDTH) * 2);
+    private static final int HOUSE_BASELINE_LENGTH_2 = HOUSE_BASELINE_LENGTH / 2;
+    private static final int HOUSE_SPACING = 4; //Spaces between houses in the card
+    private static final int MIN_LANE_SPACING = 4; //Minimum space between the side of a house and the column of that player's lane and player's name and next lane
+    private static final int MIN_LANE_WIDTH = MIN_LANE_SPACING * 2 + HOUSE_BASELINE_LENGTH; //Minimum width of a lane.  Player name could make width larger
+
+    /*
+      Player1 | Player2
+     ---------|---------
+              |
+       X | O  |    |
+      ---|--- | ---|---
+       \ |    |    |
+    */ 
 
     //******************** General Data ***************************************
 
     private String mTitle;
     private DrawingElement mDraw;
+    private int mCurLaneWidth;
+    private Dimension mDim;
 
     enum DrawingElement {
         DrawingGameBoard,
@@ -112,6 +129,8 @@ class GameBoardGraphicsPanel extends JPanel {
     {
         int width = getWidth();
         int height = getHeight();
+        mDim = new Dimension();
+        getSize(mDim);
 
         super.paintComponent(g);
 
@@ -121,11 +140,14 @@ class GameBoardGraphicsPanel extends JPanel {
                 break;
 
             case DrawingScorecard:
+                drawScorecard(g);
+                drawPointTotal(g);
                 break;
 
             default:
                 Logging.LogMsg(LogLevel.TRACE, TAG, "paintComponent, no-op.  mDraw: " + mDraw);
         }
+        drawTitle(g);
     }
 
     public void setBoard(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
@@ -142,6 +164,7 @@ class GameBoardGraphicsPanel extends JPanel {
 
     public void setScorecard(DominoGameScoreboard scoreboard) {
         mScoreboard = scoreboard;
+        mPoints = 0;
         mDraw = DrawingElement.DrawingScorecard;
     }
 
@@ -251,20 +274,157 @@ class GameBoardGraphicsPanel extends JPanel {
         }
     }
 
+    private void drawHouseLine1(Graphics g, int centerX, int centerY, int quadrant) {
+        int startX = 0, startY = 0, endX = 0, endY = 0;
+
+        if(quadrant == 0) {
+            startX = centerX - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 1) {
+            startX = centerX + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 2) {
+            startX = centerX - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else if(quadrant == 3) {
+            startX = centerX + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "drawhouseline, shouldn't be here, quadrant == " + quadrant);
+        }
+        endX = startX + CROSS_WIDTH;
+        endY = startY + CROSS_WIDTH;
+
+        g.drawLine(startX, startY, endX, endY);
+    }
+
+    private void drawHouseLine(Graphics g, int centerX, int centerY, int quadrant) {
+        drawHouseLine1(g, centerX, centerY, quadrant);
+    }
+
+    private void drawHouseCross(Graphics g, int centerX, int centerY, int quadrant) {
+        int startX = 0, startY = 0, endX = 0, endY = 0;
+
+        drawHouseLine1(g, centerX, centerY, quadrant);
+
+        if(quadrant == 0) {
+            startX = centerX - HOUSE_ELEMENT_SPACE - HOUSE_BASE_THICKNESS_2;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 1) {
+            startX = centerX + CROSS_WIDTH + HOUSE_ELEMENT_SPACE;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 2) {
+            startX = centerX - HOUSE_ELEMENT_SPACE - HOUSE_BASE_THICKNESS_2;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else if(quadrant == 3) {
+            startX = centerX + CROSS_WIDTH + HOUSE_ELEMENT_SPACE;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "drawHouseCross, shouldn't be here, quadrant == " + quadrant);
+        }
+        endX = startX - CROSS_WIDTH;
+        endY = startY + CROSS_WIDTH;
+
+        g.drawLine(startX, startY, endX, endY);
+    }
+
+    private void drawHouseCircle(Graphics g, int centerX, int centerY, int quadrant) {
+        int startX = 0, startY = 0;
+
+        if(quadrant == 0) {
+            startX = centerX - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 1) {
+            startX = centerX + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+            startY = centerY - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+        } else if(quadrant == 2) {
+            startX = centerX - HOUSE_BASELINE_LENGTH_2 + HOUSE_ELEMENT_SPACE;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else if(quadrant == 3) {
+            startX = centerX + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+            startY = centerY + HOUSE_ELEMENT_SPACE + HOUSE_BASE_THICKNESS_2;
+        } else {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "drawHouseCircle, shouldn't be here, quadrant == " + quadrant);
+        }
+
+        g.drawOval(startX, startY, CIRCLE_DIAMETER, CIRCLE_DIAMETER);
+    }
+
+    private void drawHouse(Graphics g, int centerX, int centerY, ScoreCardHouse curHouse) {
+        int horLineStartX = centerX - HOUSE_BASELINE_LENGTH_2, horLineStartY = centerY - (HOUSE_BASE_THICKNESS / 2);
+        int verLineStartX = centerX - HOUSE_BASE_THICKNESS_2, verLineStartY = centerY - HOUSE_BASELINE_LENGTH_2;
+
+        //Draw horizontial base line of house if present
+        if(curHouse.getHorizontalBase()) {
+            g.setColor(Color.BLACK);
+            g.fillRect(horLineStartX, horLineStartY, HOUSE_BASELINE_LENGTH, HOUSE_ELEMENT_THICKNESS);
+        }
+
+        //Draw vertical base line of house if present
+        if(curHouse.getVerticalBase()) {
+            g.setColor(Color.BLACK);
+            g.fillRect(verLineStartX, verLineStartY, HOUSE_ELEMENT_THICKNESS, HOUSE_BASELINE_LENGTH);
+        }
+
+        ScoreCardHouse.QuadState[] quads = curHouse.getQuads();
+        if(quads != null) {
+            for(int idx =0; idx < quads.length; idx++) {
+                switch(quads[idx]) {
+                    case Line:
+                        drawHouseLine(g, centerX, centerY, idx);
+                        break;
+                    case Cross:
+                        drawHouseCross(g, centerX, centerY, idx);
+                        break;
+                    case Circle:
+                        drawHouseCircle(g, centerX, centerY, idx);
+                        break;
+                    case Empty:
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private void drawScorecard(Graphics g) {
+        int startX = mDim.width/2, startY = mDim.height/2;
+        Logging.LogMsg(LogLevel.TRACE, TAG, "drawScorecard, panel size: " + mDim.width + "x" + mDim.height);
+
+        if(mScoreboard != null && mScoreboard.getNumPlayers() > 0) {
+            int numPlayers = mScoreboard.getNumPlayers();
+            int desiredPlayer = 0;
+            String playersArr[] = null;
+            playersArr = mScoreboard.getPlayers().toArray(new String[0]);
+            for(int idx = 0; idx < numPlayers; idx++) {
+                if(mScoreboard.getPlayerPoints(playersArr[idx]) > 0)
+                    desiredPlayer = idx;
+            }
+            String curPlayer = playersArr[desiredPlayer];
+            if(curPlayer != null) {
+                mPoints = mScoreboard.getPlayerPoints(curPlayer);
+                ArrayList<ScoreCardHouse> houses = mScoreboard.getPlayerScoreCardHouses(curPlayer);
+                if(houses != null && houses.size() > 0) {
+//                    Logging.LogMsg(LogLevel.TRACE, TAG, "drawScorecard: Drawing house for player: " + curPlayer + " with total points: " + mPoints);
+                    mTitle += " - Drawing house for player: " + curPlayer;
+                    ScoreCardHouse curHouse = houses.get(0);
+                    drawHouse(g, mDim.width / 2, mDim.height / 2, curHouse);
+                }
+            }
+        }
+    }
+
     private void drawDomBoard(Graphics g) {
-        Dimension dim = new Dimension();
         int[] rowCord, colCord;
         int rowStartX = 0, rowStartY = 0;
         int colStartX = 0, colStartY = 0;
 
-        getSize(dim);
-        Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, panel size: " + dim.width + "x" + dim.height);
+        Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, panel size: " + mDim.width + "x" + mDim.height);
 
-        rowCord = getRowX(dim.width);
-        colCord = getColY(dim.height);
+        rowCord = getRowX(mDim.width);
+        colCord = getColY(mDim.height);
 
         drawPointTotal(g);
-        drawTitle(g);
 
         //The row starts at row x, spinner y
         //The column starts at column y and spinner
@@ -282,7 +442,7 @@ class GameBoardGraphicsPanel extends JPanel {
         if(colCord[SPN_XY_IDX] != INVALID_CORD) {
             rowStartY = colCord[SPN_XY_IDX];
         } else {
-            rowStartY = (dim.height / 2) - (mDomWidth_2);
+            rowStartY = (mDim.height / 2) - (mDomWidth_2);
         }
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawDomBoard, spinner/row startY coordinate: " + rowStartY);

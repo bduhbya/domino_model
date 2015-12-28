@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
 import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
@@ -99,7 +100,17 @@ public class FunctionalTesting {
                       ", passed: " + passFailCtr[PASS_CTR] + " - failed: " + passFailCtr[FAIL_CTR]);
     }
 
-    private void refreshDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points, String testName) {
+    private void refreshScoreboardDisplay(DominoGameScoreboard scoreboard, String testName) {
+
+        if(mRunGuiTests) {
+            mPanel.setScorecard(scoreboard);
+            mPanel.setTitle(testName);
+            mPanel.revalidate();
+            mPanel.repaint();
+        }
+    }
+
+    private void refreshGameboardDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points, String testName) {
 
         if(mRunGuiTests) {
             mPanel.setBoard(row, col, spinner, points);
@@ -107,8 +118,6 @@ public class FunctionalTesting {
             mPanel.revalidate();
             mPanel.repaint();
         }
-
-        return;
     }
 
     public void resetTestMetrics() {
@@ -147,7 +156,7 @@ public class FunctionalTesting {
         }
 
         title += ": " + (success ? "SUCCESS" : "FAILED");
-        refreshDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl, title);
+        refreshGameboardDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl, title);
 
         return success;
     }
@@ -254,7 +263,7 @@ public class FunctionalTesting {
             }
         }
 
-        //TODO: Draw score card on screen
+        refreshScoreboardDisplay(scoreCard, testName);
         title += ": " + (success ? "SUCCESS" : "FAILED");
         return success;
     }
@@ -269,6 +278,7 @@ public class FunctionalTesting {
 
         //TODO: Refactor to be like gameboard tests in array
         if(!mRunGuiTests) {
+            Logging.LogMsg(LogLevel.TRACE, TAG, "runAutomatedTests, running GUI test without GUI");
             tempSuccess = testDominoGameBoard(this);
             if(success) success = tempSuccess;
             tempSuccess = testDominoGameScoreboard(this);
@@ -702,6 +712,30 @@ public class FunctionalTesting {
 
     //DominoGameScoreboard test bodies
     public static IFunctionalTest[] mDominoGameScoreboardTests = {
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true;
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add("Player 1");
+            gamePlayers.add("Player 2");
+            gamePlayers.add("Player 3");
+            gamePlayers.add("Player 4");
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            Set<String> boardPlayers = scoreBoard.getPlayers();
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoGameScoreboard: Validate getPlayers() function";
+
+            for(String player : gamePlayers) {
+                if(!boardPlayers.contains(player)) {
+                    success = false;
+                    messages.add("Player: " + player + " not on score board, expected on score board");
+                }
+            }
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+            test.refreshScoreboardDisplay(scoreBoard, TEST_NAME);
+
+            return success;
+        }},
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
@@ -1420,7 +1454,7 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
-            test.refreshDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
+            test.refreshGameboardDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
 
             return success;
         }},
@@ -1702,7 +1736,7 @@ public class FunctionalTesting {
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
                         ", col: " + ((col == null) ? "NULL" : "NOT NULL") + ", spinner: " + ((spinner == null) ? "NULL" : "NOT NULL"));
                 }
-                test.refreshDisplay(row, col, spinner, board.getPerimTotal(), TEST_NAME);
+                test.refreshGameboardDisplay(row, col, spinner, board.getPerimTotal(), TEST_NAME);
             }
 
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
@@ -1731,7 +1765,7 @@ public class FunctionalTesting {
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
                         ", col: " + ((col == null) ? "NULL" : "NOT NULL") + ", spinner: " + ((spinner == null) ? "NULL" : "NOT NULL"));
                 }
-                test.refreshDisplay(row, col, spinner, board.getPerimTotal(), TEST_NAME);
+                test.refreshGameboardDisplay(row, col, spinner, board.getPerimTotal(), TEST_NAME);
             }
 
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
@@ -1834,13 +1868,18 @@ public class FunctionalTesting {
 
             mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess,
                 FunctionalTesting.mGuiTests.get(mCurEventBasedFunctionalTestGroup)[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
-//            mTest.mTstClassSuccess = checkGroupSuccess(mTest.mTstClassSuccess, FunctionalTesting.mGameBoardTests[mTest.mCurEventBasedFunctionalTest].runTest(mTest));
             mTest.mCurEventBasedFunctionalTest++;
 
-            if(mTest.mCurEventBasedFunctionalTest == FunctionalTesting.mGameBoardTests.length) {
-                mTest.mNextVisualTestBtn.setEnabled(false);
+            if(mTest.mCurEventBasedFunctionalTest == FunctionalTesting.mGuiTests.get(mCurEventBasedFunctionalTestGroup).length) {
                 logSummary(TEST_BOARD_CLASS, mTest.mTstClassSuccess, mTest.mPassFailCtr);
                 mTest.mCurEventBasedFunctionalTest = 0;
+                mCurEventBasedFunctionalTestGroup++;
+            }
+
+            if(mCurEventBasedFunctionalTestGroup == FunctionalTesting.mGuiTests.size()) {
+                Logging.LogMsg(LogLevel.TRACE, TAG, "VisualTestBtnActionListener, disabling test button. mCurEventBasedFunctionalTestGroup: " + mCurEventBasedFunctionalTestGroup +
+                                  ", test list size: " + FunctionalTesting.mGuiTests.size());
+                mTest.mNextVisualTestBtn.setEnabled(false);
             }
         }
     }
@@ -1875,8 +1914,8 @@ public class FunctionalTesting {
     }
 
     static {
-        mGuiTests.add(mGameBoardTests);
         mGuiTests.add(mDominoGameScoreboardTests);
+        mGuiTests.add(mGameBoardTests);
     }
 
 

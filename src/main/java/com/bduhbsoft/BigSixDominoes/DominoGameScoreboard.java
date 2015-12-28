@@ -1,6 +1,7 @@
 package com.bduhbsoft.BigSixDominoes;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.lang.IndexOutOfBoundsException;
@@ -121,6 +122,15 @@ public class DominoGameScoreboard {
     */
     public int getNumPlayers() {
         return mPlayerScoreCards.size();
+    }
+
+    /**
+    * Returns set of players
+    *
+    * @return Set of players
+    */
+    public Set<String> getPlayers() {
+        return mPlayerScoreCards.keySet();
     }
 
     private int getPoints(String player) {
