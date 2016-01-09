@@ -31,6 +31,7 @@ public class ScoreCardHouse {
     private int mHouseFull; //Maximum points for a house
 
     public static final int DEFAULT_MULTIPLE = 5; //Built with multiples of 5
+    public static final int NUM_HOUSE_ELEMENTS = 10;
     private static final String TAG = "ScoreCardHouse";
 
     /**
@@ -71,7 +72,7 @@ public class ScoreCardHouse {
         for(int idx = 0; idx < mQuads.length; idx++) {
             mQuads[idx] = QuadState.Empty;
         }
-        mHouseFull = mMultiple * 10;
+        mHouseFull = mMultiple * NUM_HOUSE_ELEMENTS;
         mPoints = 0;
         mCurQuad = 0;
         mDoubleMultiple = mMultiple * 2;

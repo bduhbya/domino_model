@@ -32,16 +32,20 @@ public class DominoGameScoreboard {
     private Map<String, ArrayList<ScoreCardHouse>> mPlayerScoreCards;
     private static final int PLAYER_NOT_FOUND_POINTS = -1;
     private int mScoreMultiple;
+    private int mScoreThreshold;
 
     /**
     * Constructs score board.  Note, this should use the player username in case
     * display name changes
     *
     * @param players ArryList of player names for the scoreboard
+    *
+    * @param threshold Maximum score to win the game
     */ 
-    public DominoGameScoreboard(ArrayList<String> players) {
+    public DominoGameScoreboard(ArrayList<String> players, int threshold) {
         mPlayerScoreCards = new HashMap<String, ArrayList<ScoreCardHouse>>();
         mScoreMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+        mScoreThreshold = threshold;
 
         for(String player : players) {
             ArrayList<ScoreCardHouse> scoreCard = new ArrayList<ScoreCardHouse>();
@@ -55,12 +59,15 @@ public class DominoGameScoreboard {
     * display name changes
     *
     * @param players ArryList of player names for the scoreboard
+    *
+    * @param threshold Maximum score to win the game
     * 
     * @param scoreMultiple Non default multiple for scoring
     */ 
-    public DominoGameScoreboard(ArrayList<String> players, int scoreMultiple) {
+    public DominoGameScoreboard(ArrayList<String> players, int threshold, int scoreMultiple) {
         mPlayerScoreCards = new HashMap<String, ArrayList<ScoreCardHouse>>();
         mScoreMultiple = scoreMultiple;
+        mScoreThreshold = threshold;
 
         for(String player : players) {
             ArrayList<ScoreCardHouse> scoreCard = new ArrayList<ScoreCardHouse>();
@@ -142,6 +149,34 @@ public class DominoGameScoreboard {
         }
 
         return points;
+    }
+
+    /**
+    * Returns the scoring multiple
+    *
+    * @return Scoring multiple to make a valid score
+    */
+    public int getScoringMultiple() {
+        return mScoreMultiple;
+    }
+
+    /**
+    * Returns the scoring threshold
+    *
+    * @return Scoring threshold to win the game
+    */
+    public int getScoringThreshold() {
+        return mScoreThreshold;
+    }
+
+    /**
+    * Returns the maximum expected houses given the scoring threshold
+    *
+    * @return Maximum number of houses expected given the scoring threshold
+    */
+    public int getMaximumHouses() {
+        int pointsPerHouse = mScoreMultiple * ScoreCardHouse.NUM_HOUSE_ELEMENTS;
+        return (mScoreThreshold / pointsPerHouse) + 1;
     }
 
     private ArrayList<ScoreCardHouse> getScoreCardHouses(String player) {

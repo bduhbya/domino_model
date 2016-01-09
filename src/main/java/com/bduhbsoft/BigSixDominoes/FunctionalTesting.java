@@ -47,6 +47,7 @@ public class FunctionalTesting {
     private final static Map<String, LogLevel> LOG_MAP = new HashMap<>();
     private static ArrayList<IFunctionalTest[]> mGuiTests = new ArrayList<>();
     public final static String BAD_PLAYER = "Bad player name!";
+    public final static int DEFAULT_THRESHOLD = 150;
 
     private JFrame mApplication;
     private GameBoardGraphicsPanel mPanel;
@@ -221,9 +222,11 @@ public class FunctionalTesting {
     }
 
     private boolean testScoreCardAddPoints(DominoGameScoreboard scoreCard, int[] addPoints, String[] player, int expectedPlayerCount, int[] expectedTtl,
-                                           boolean[] expectedSuccess, ArrayList<ScoreCardHouse> houses, ArrayList<String> messages, String testName) {
+                                           boolean[] expectedSuccess, ArrayList<ScoreCardHouse> houses, int threshold, ArrayList<String> messages, String testName) {
         boolean success = true, tempSuccess = true;
         int total;
+        int actualThreshold;
+        int expectedMaxHouses;
         String title = testName;
         String lastPlayer = "";
 
@@ -250,7 +253,7 @@ public class FunctionalTesting {
         total = scoreCard.getNumPlayers();
         if(total != expectedPlayerCount) {
             success = false;
-            messages.add("Found: " + total + ", players.  Expexted: " + expectedPlayerCount);
+            messages.add("Found: " + total + ", players.  Expected: " + expectedPlayerCount);
         }
 
         if(houses != null) {
@@ -261,6 +264,18 @@ public class FunctionalTesting {
                                  ", expected: " + houses.get(idx));
                 }
             }
+        }
+
+        actualThreshold = scoreCard.getScoringThreshold();
+        if(actualThreshold != threshold) {
+            success = false;
+            messages.add("Threshold mismatch.  Actual threshold: " + actualThreshold + ", expected: " + threshold);
+        }
+
+        expectedMaxHouses = (actualThreshold / (scoreCard.getScoringMultiple() * ScoreCardHouse.NUM_HOUSE_ELEMENTS)) + 1;
+        if(expectedMaxHouses != scoreCard.getMaximumHouses()) {
+            success = false;
+            messages.add("Maximum houses mismatch.  Actual maximum: " + scoreCard.getMaximumHouses() + ", expected: " + expectedMaxHouses);
         }
 
         refreshScoreboardDisplay(scoreCard, testName);
@@ -720,7 +735,7 @@ public class FunctionalTesting {
             gamePlayers.add("Player 2");
             gamePlayers.add("Player 3");
             gamePlayers.add("Player 4");
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             Set<String> boardPlayers = scoreBoard.getPlayers();
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameScoreboard: Validate getPlayers() function";
@@ -744,7 +759,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {5      };
             String players[]          = new String[]  {player1};
@@ -755,7 +770,7 @@ public class FunctionalTesting {
 
             expectedHouses.add(new ScoreCardHouse(usingMultiple));
             expectedHouses.get(0).addPoints(addPoints[addPoints.length-1]);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -768,7 +783,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {5         };
             String players[]          = new String[]  {BAD_PLAYER};
@@ -778,7 +793,7 @@ public class FunctionalTesting {
             final String TEST_NAME = "DominoGameScoreboard: Add points for invalid player";
 
             expectedHouses = null;
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -791,7 +806,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {5      , 10     };
             String players[]          = new String[]  {player1, player2};
@@ -802,7 +817,7 @@ public class FunctionalTesting {
 
             expectedHouses.add(new ScoreCardHouse(usingMultiple));
             expectedHouses.get(0).addPoints(expectedTtl[expectedTtl.length-1]);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -815,7 +830,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple+2};
             String players[]          = new String[]  {player1        , player2        };
@@ -826,7 +841,7 @@ public class FunctionalTesting {
 
             expectedHouses.add(new ScoreCardHouse(usingMultiple));
             expectedHouses.get(0).addPoints(expectedTtl[expectedTtl.length-1]);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -839,13 +854,13 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple*11};
             String players[]          = new String[]  {player1        , player2         };
             int expectedTtl[]         = new int[]     {0              , usingMultiple*11};
             boolean expectedSuccess[] = new boolean[] {true           , true            };
-            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested separately
             final String TEST_NAME = "DominoGameScoreboard: Add two-house score for one player in one play";
 
             int leftOver = expectedTtl[expectedTtl.length-1];
@@ -855,7 +870,7 @@ public class FunctionalTesting {
                 leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
                 curHouse++;
             } while(leftOver > 0);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -868,7 +883,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {usingMultiple+1, usingMultiple*21};
             String players[]          = new String[]  {player1        , player2         };
@@ -884,7 +899,7 @@ public class FunctionalTesting {
                 leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
                 curHouse++;
             } while(leftOver > 0);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
@@ -897,7 +912,7 @@ public class FunctionalTesting {
             gamePlayers.add(player1);
             gamePlayers.add(player2);
             int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
-            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers);
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
             ArrayList<String> messages = new ArrayList<String>();
             int addPoints[]           = new int[]     {usingMultiple, usingMultiple*5, usingMultiple*5 , usingMultiple*5 , usingMultiple*5 };
             String players[]          = new String[]  {player2      , player2        , player2         , player2         , player2         };
@@ -913,7 +928,7 @@ public class FunctionalTesting {
                 leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
                 curHouse++;
             } while(leftOver > 0);
-            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, messages, TEST_NAME);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;

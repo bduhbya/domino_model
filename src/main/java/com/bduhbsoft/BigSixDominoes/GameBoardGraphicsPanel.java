@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
@@ -63,7 +64,8 @@ class GameBoardGraphicsPanel extends JPanel {
     private static final int TITLE_SIZE = 15;
     private static final Color SCORE_COLOR = Color.BLACK;
     private static final Color TITLE_COLOR = Color.BLUE;
-
+    private static final Font TITLE_FONT = new Font("Monospaced", Font.PLAIN, TITLE_SIZE);
+    private static final Font SCORE_FONT = new Font("Monospaced", Font.PLAIN, SCORE_SIZE);
     private ArrayList<Dominoe> mRow;
     private ArrayList<Dominoe> mCol;
     private Dominoe mSpinner;
@@ -78,12 +80,18 @@ class GameBoardGraphicsPanel extends JPanel {
     private static final int HOUSE_ELEMENT_SPACE = 3; //Space between elements in a house and the hor/ver base lines
     private static final int HOUSE_BASE_THICKNESS = 3; //Thickness of base lines of the house
     private static final int HOUSE_BASE_THICKNESS_2 = HOUSE_BASE_THICKNESS / 2; //Thickness of base lines of the house
-//    private static final int HOUSE_BASELINE_LENGTH = ((HOUSE_ELEMENT_SPACE + CROSS_WIDTH + HOUSE_ELEMENT_SPACE) * 2) + HOUSE_ELEMENT_THICKNESS;
     private static final int HOUSE_BASELINE_LENGTH = ((HOUSE_ELEMENT_SPACE * 2 + CROSS_WIDTH) * 2);
     private static final int HOUSE_BASELINE_LENGTH_2 = HOUSE_BASELINE_LENGTH / 2;
     private static final int HOUSE_SPACING = 4; //Spaces between houses in the card
     private static final int MIN_LANE_SPACING = 4; //Minimum space between the side of a house and the column of that player's lane and player's name and next lane
     private static final int MIN_LANE_WIDTH = MIN_LANE_SPACING * 2 + HOUSE_BASELINE_LENGTH; //Minimum width of a lane.  Player name could make width larger
+    private static final int HOUSE_DRAW_LENGTH = HOUSE_BASELINE_LENGTH + HOUSE_SPACING;
+    private static final int HOUSE_DRAW_LENGTH_2 = HOUSE_DRAW_LENGTH / 2;
+    private static final int PLAYER_FONT_OVER_DRAW = 2;
+    private static final int PLAYER_FONT_SIZE = 9;
+    private static final Color PLAYER_FONT_COLOR = Color.BLACK;
+    private static final Font PLAYER_FONT = new Font("Monospaced", Font.PLAIN, PLAYER_FONT_SIZE);
+    private static final int SCORECARD_LINE_WIDTH = 3;
 
     /*
       Player1 | Player2
@@ -258,7 +266,7 @@ class GameBoardGraphicsPanel extends JPanel {
         Color curCol = g.getColor();
 
         g.setColor(SCORE_COLOR);
-        g.setFont(new Font("Monospaced", Font.PLAIN, SCORE_SIZE));
+        g.setFont(SCORE_FONT);
         g.drawString(Integer.toString(mPoints), SCORE_X, SCORE_Y);
         g.setColor(curCol);
     }
@@ -268,7 +276,7 @@ class GameBoardGraphicsPanel extends JPanel {
         if(mTitle != null) {
             Color curCol = g.getColor();
             g.setColor(TITLE_COLOR);
-            g.setFont(new Font("Monospaced", Font.PLAIN, TITLE_SIZE));
+            g.setFont(TITLE_FONT);
             g.drawString(mTitle, TITLE_X, TITLE_Y);
             g.setColor(curCol);
         }
@@ -387,29 +395,71 @@ class GameBoardGraphicsPanel extends JPanel {
         }
     }
 
+    private int findLaneWidth(String[] playersArr, FontMetrics metrics) {
+        int longestName = 0;
+        int width = 0;
+        for(int idx = 0; idx < playersArr.length; idx++) {
+            int curWidth = metrics.stringWidth(playersArr[idx]);
+            longestName = (curWidth > longestName ? curWidth : longestName);
+            Logging.LogMsg(LogLevel.TRACE, TAG, "drawScorecard, longest name: " + longestName + ", cur player name: " + playersArr[idx]);
+        }
+        width = longestName + MIN_LANE_SPACING * 2;
+        width = (width > MIN_LANE_WIDTH ? width : MIN_LANE_WIDTH);
+        return width;
+    }
+
+    private void drawPlayerLane(Graphics g, String name, int baseX, int baseY, int laneWidth, FontMetrics metrics,
+                                int maxHouses, ArrayList<ScoreCardHouse> houses, boolean drawDivder) {
+        int fontHeight = metrics.getHeight();
+        int fontStartX = baseX + (laneWidth/2) - metrics.stringWidth(name)/2; //Center font in the lane
+        int fontStartY = baseY - HOUSE_ELEMENT_SPACE;
+
+        //Draw underline
+        g.setColor(PLAYER_FONT_COLOR);
+        g.fillRect(baseX, baseY, laneWidth, SCORECARD_LINE_WIDTH);
+        g.setFont(PLAYER_FONT);
+        g.drawString(name, fontStartX, fontStartY);
+
+        if(drawDivder) {
+            int divY = baseY - (fontHeight + PLAYER_FONT_OVER_DRAW);
+            int divX = baseX + laneWidth;
+            int divLineHeight = fontHeight + PLAYER_FONT_OVER_DRAW + (maxHouses * HOUSE_DRAW_LENGTH);
+            g.fillRect(divX, divY, SCORECARD_LINE_WIDTH, divLineHeight + SCORECARD_LINE_WIDTH);
+        }
+
+        if(houses != null) {
+            int startHouseX = baseX + (laneWidth/2);
+            int startHouseY = baseY + SCORECARD_LINE_WIDTH + HOUSE_DRAW_LENGTH_2;
+            int idx = 1;
+            for(ScoreCardHouse curHouse : houses) {
+                drawHouse(g, startHouseX, startHouseY, curHouse);
+                startHouseY += HOUSE_DRAW_LENGTH;
+                idx++;
+            }
+        }
+    }
+
     private void drawScorecard(Graphics g) {
-        int startX = mDim.width/2, startY = mDim.height/2;
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawScorecard, panel size: " + mDim.width + "x" + mDim.height);
 
         if(mScoreboard != null && mScoreboard.getNumPlayers() > 0) {
-            int numPlayers = mScoreboard.getNumPlayers();
             int desiredPlayer = 0;
             String playersArr[] = null;
+            String curPlayer = null;
             playersArr = mScoreboard.getPlayers().toArray(new String[0]);
-            for(int idx = 0; idx < numPlayers; idx++) {
-                if(mScoreboard.getPlayerPoints(playersArr[idx]) > 0)
-                    desiredPlayer = idx;
-            }
-            String curPlayer = playersArr[desiredPlayer];
-            if(curPlayer != null) {
-                mPoints = mScoreboard.getPlayerPoints(curPlayer);
-                ArrayList<ScoreCardHouse> houses = mScoreboard.getPlayerScoreCardHouses(curPlayer);
-                if(houses != null && houses.size() > 0) {
-//                    Logging.LogMsg(LogLevel.TRACE, TAG, "drawScorecard: Drawing house for player: " + curPlayer + " with total points: " + mPoints);
-                    mTitle += " - Drawing house for player: " + curPlayer;
-                    ScoreCardHouse curHouse = houses.get(0);
-                    drawHouse(g, mDim.width / 2, mDim.height / 2, curHouse);
-                }
+            // get metrics from the graphics
+            FontMetrics metrics = g.getFontMetrics(PLAYER_FONT);
+            int fontHeight = metrics.getHeight();
+            int curLaneWidth = findLaneWidth(playersArr, metrics);
+            int scorecardLength = curLaneWidth * playersArr.length;
+            int curX = 0, curY = 0;
+            int startX = mDim.width/2 - scorecardLength/2, startY = mDim.height/2;
+            for(int curIdx = 0; curIdx < playersArr.length; ++curIdx) {
+                curX = startX + ((curLaneWidth + SCORECARD_LINE_WIDTH) * curIdx);
+                curY = startY;
+                curPlayer = playersArr[curIdx];
+                drawPlayerLane(g, curPlayer, curX, curY, curLaneWidth, metrics, mScoreboard.getMaximumHouses(),
+                               mScoreboard.getPlayerScoreCardHouses(curPlayer), ((curIdx+1) < playersArr.length));
             }
         }
     }
