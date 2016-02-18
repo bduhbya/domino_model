@@ -1,18 +1,27 @@
 package com.bduhbsoft.BigSixDominoes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /*
 * Class Dominoe
 *
-* Define a Dominoe
+* Defines a Dominoe
 */
 
 public class Dominoe {
-    private int mSide1;
-    private int mSide2;
+    private DominoSide mSide1;
+    private DominoSide mSide2;
     private boolean mIsDouble;
-    private Orientation mOrientation;
+
+    private static HashMap<DominoSide.SideOrientation, Orientation> sOrientationMap = new HashMap<>();
+
+    static {
+        sOrientationMap.put(DominoSide.SideOrientation.North, Orientation.SIDE1_NORTH);
+        sOrientationMap.put(DominoSide.SideOrientation.South, Orientation.SIDE1_SOUTH);
+        sOrientationMap.put(DominoSide.SideOrientation.East, Orientation.SIDE1_EAST);
+        sOrientationMap.put(DominoSide.SideOrientation.West, Orientation.SIDE1_WEST);
+    }
 
     public enum Orientation {
         SIDE1_NORTH,
@@ -30,10 +39,10 @@ public class Dominoe {
 
     public static ArrayList<Dominoe> getDominoeSet(SetType setType) {
         //TODO: case statement
-        return getDouleSixSet();
+        return getDoubleSixSet();
     }
 
-    private static ArrayList<Dominoe> getDouleSixSet() {
+    private static ArrayList<Dominoe> getDoubleSixSet() {
         ArrayList<Dominoe> set = new ArrayList<Dominoe>();
 
         //Create double six set
@@ -76,17 +85,25 @@ public class Dominoe {
     }
 
     public Dominoe(int side1, int side2) {
-        mSide1 = side1;
-        mSide2 = side2;
-        mIsDouble = mSide1 == mSide2;
-        mOrientation = Orientation.SIDE1_NORTH;
+        mSide1 = new DominoSide(side1);
+        mSide2 = new DominoSide(side2);
+        mIsDouble = mSide1.equals(mSide2);
+        setSidesOrientaion(Orientation.SIDE1_NORTH);
     }
 
     public int getSide1() {
-        return mSide1;
+        return mSide1.getValue();
     }
 
     public int getSide2() {
+        return mSide2.getValue();
+    }
+
+    public DominoSide getDomSide1() {
+        return mSide1;
+    }
+
+    public DominoSide getDomSide2() {
         return mSide2;
     }
 
@@ -95,25 +112,45 @@ public class Dominoe {
     }
 
     public Orientation getOrientation() {
-        return mOrientation;
+        return sOrientationMap.get(mSide1.getOrientation());
     }
 
     public void setOrientation(Orientation orientation) {
-        mOrientation = orientation;
+        setSidesOrientaion(orientation);
     }
 
     @Override
     public String toString() {
-        return mSide1 + "|" + mSide2;
+        return mSide1.getValue() + "|" + mSide2.getValue();
     }
 
     public boolean equals(Dominoe rhs) {
         return
-            ( (this.mSide1 == rhs.getSide1()) &&
-              (this.mSide2 == rhs.getSide2())   ) ||
+            ( (this.mSide1.equals(rhs.getDomSide1())) &&
+              (this.mSide2.equals(rhs.getDomSide2()))   ) ||
 
-            ( (this.mSide1 == rhs.getSide2()) &&
-              (this.mSide2 == rhs.getSide1())   );
+            ( (this.mSide1.equals(rhs.getDomSide2())) &&
+              (this.mSide2.equals(rhs.getDomSide1()))   );
     }
 
+    private void setSidesOrientaion(Orientation newOrn) {
+        switch(newOrn) {
+            case SIDE1_NORTH:
+                mSide1.setOrientation(DominoSide.SideOrientation.North);
+                mSide2.setOrientation(DominoSide.SideOrientation.South);
+                break;
+            case SIDE1_SOUTH:
+                mSide1.setOrientation(DominoSide.SideOrientation.South);
+                mSide2.setOrientation(DominoSide.SideOrientation.North);
+                break;
+            case SIDE1_EAST:
+                mSide1.setOrientation(DominoSide.SideOrientation.East);
+                mSide2.setOrientation(DominoSide.SideOrientation.West);
+                break;
+            case SIDE1_WEST:
+                mSide1.setOrientation(DominoSide.SideOrientation.West);
+                mSide2.setOrientation(DominoSide.SideOrientation.East);
+                break;
+        }
+    }
 }
