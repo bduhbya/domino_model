@@ -77,10 +77,12 @@ public class DominoGameScoreboard {
     }
 
     /**
-    * Adds specified number of points to players score.
+    * Adds specified number of points to a player's score.
     *
-    * @param player name of player that scored. MUST match player used in 
+    * @param player Name of player that scored. MUST match player used in 
     * the constructor
+    *
+    * @param points Points added for the given player
     *
     * @return True if player found and points attempted to be added, false otherwise
     */
@@ -92,14 +94,14 @@ public class DominoGameScoreboard {
             found = true;
         }
 
-        //TODO: Add callback for valid score
+        //TODO: Consider adding callback for valid score
         return found;
     }
 
     /**
     * Retrieves points for given player.
     *
-    * @return -1 if player is not found
+    * @return Points for that player or -1 if player is not found
     */ 
     public int getPlayerPoints(String player) {
         if(checkPlayer(player)) {

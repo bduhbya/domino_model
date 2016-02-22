@@ -387,6 +387,7 @@ public class FunctionalTesting {
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
         ArrayList<String> messages = new ArrayList<String>();
         final String name = "Test Player", userName = "TestUname";
+        final DominoePlayer.PlayerType pType = DominoePlayer.PlayerType.Server;
         final boolean initialTurn = false, setTurn = true;
         final int initialScore = 0, setNewScore = 15;
         DominoePlayer player;
@@ -395,8 +396,11 @@ public class FunctionalTesting {
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoePlayer Class Tests");
 
+        //TODO: Consider removing these test as it only tests getting/setting which is a JVM operation.  Should probably
+        //TODO: only test actual logic if any makes it way into the player class
+
         //Case new player with default values
-        player = new DominoePlayer(name, userName);
+        player = new DominoePlayer(name, userName, pType);
         if(player.getDisplayName() != name) {
             success = false;
             messages.add("Display name mismatch.  Constructed with: " + name + ", got: " + player.getDisplayName());
@@ -705,17 +709,20 @@ public class FunctionalTesting {
             options = new DominoeGameOptions(DominoeGameOptions.DEFAULT_PLAYERS,
                                              DominoeGameOptions.SCORE_THRESHOLD,
                                              DominoeGameOptions.MIN_START_SCORE,
-                                             DominoeGameOptions.DOM_PER_HAND);
+                                             DominoeGameOptions.DOM_PER_HAND,
+                                             DominoeGameOptions.SCORE_MULTIPLE);
 
             if(options.getNumPlayers()       != DominoeGameOptions.DEFAULT_PLAYERS ||
                options.getScoreThreshold()   != DominoeGameOptions.SCORE_THRESHOLD ||
                options.getMinStartingScore() != DominoeGameOptions.MIN_START_SCORE ||
+               options.getScoreMultiple()    != DominoeGameOptions.SCORE_MULTIPLE  ||
                options.getNumDomPerHand()    != DominoeGameOptions.DOM_PER_HAND       ) {
                 messages.add("Options do not match created values, expected num players: " + DominoeGameOptions.DEFAULT_PLAYERS +
                              ", found: " + options.getNumPlayers() + ", expected threshold: " + DominoeGameOptions.SCORE_THRESHOLD +
                              ", found: " + options.getScoreThreshold() + ", expected starting score: " + DominoeGameOptions.MIN_START_SCORE +
                              ", found: " + options.getMinStartingScore() + ", expected dominoes per hand: " + DominoeGameOptions.DOM_PER_HAND +
-                             ", found: " + options.getNumDomPerHand());
+                             ", found: " + options.getNumDomPerHand() + ", expected scoring multiple: " + DominoeGameOptions.SCORE_MULTIPLE +
+                             ", found: " + options.getScoreMultiple());
                 success = false;
             }
 

@@ -1,6 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
-/*
+/**
 * Class DominoePlayer
 *
 * Defines a DominoePlayer
@@ -11,18 +11,54 @@ public class DominoePlayer {
     String mUserName;
     boolean mIsMyTurn;
     int mScore;
+    PlayerType mType;
 
-    public DominoePlayer(String displayName, String userName) {
+    /**
+    * Enumerates the player type.  Player is either on the server
+    * or available via direct bluetooth or wifi connection or is an
+    * AI player
+    */ 
+    public enum PlayerType {
+        /**
+        * Server player turn is sent to the server for processing
+        */ 
+        Server,
+
+        /**
+        * AI players are procesed locally
+        */ 
+        AI,
+
+        /**
+        * Bluetooth player turn is sent via bluetooth connection directly to the player.
+        */ 
+        BlueTooth,
+
+        /**
+        * Wifi player turn is sent via wifi connection directly to the player.
+        */ 
+        Wifi
+    }
+
+    /**
+    * Constructs new player
+    *
+    * @param displayName Name displayed during the game
+    *
+    * @param userName Players official username
+    */ 
+    public DominoePlayer(String displayName, String userName, PlayerType type) {
         mUserName = userName;
         mDisplayName = displayName;
         mIsMyTurn = false;
         mScore = 0;
+        mType = type;
     }
 
     /**
     * Returns the display name of the player
     *
-    * @return String : the display name
+    * @return The display name
     */
     public String getDisplayName() {
         return mDisplayName;
@@ -33,7 +69,7 @@ public class DominoePlayer {
     * <p/>
     * User name is guaranteed unique
     *
-    * @return String : the user name
+    * @return The user name
     */
     public String getUserName() {
         return mUserName;
@@ -42,7 +78,7 @@ public class DominoePlayer {
     /**
     * Returns the current player's turn status
     *
-    * @return boolean User's turn status
+    * @return User's turn status
     */
     public boolean isMyTurn() {
         return mIsMyTurn;
@@ -51,7 +87,7 @@ public class DominoePlayer {
     /**
     * Returns the current player's score
     *
-    * @return boolean User's turn status
+    * @return User's current score
     */
     public int getScore() {
         return mScore;
@@ -62,7 +98,7 @@ public class DominoePlayer {
     * <p/>
     * Is not checked.  Containing structure repsonsible for managing
     *
-    * @param boolean : User's turn status
+    * @param myTurn User's turn status
     */
     public void setMyTurn(boolean myTurn) {
         mIsMyTurn = myTurn;
@@ -73,7 +109,7 @@ public class DominoePlayer {
     * <p/>
     * Is not checked.  Containing structure repsonsible for managing
     *
-    * @param int : User's score
+    * @param newScore User's score
     */
     public void setScore(int newScore) {
         mScore = newScore;

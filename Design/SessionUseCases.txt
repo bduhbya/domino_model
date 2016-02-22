@@ -1,0 +1,20 @@
+Session Data required:
+
+ - Players
+   - Player Type: Server, BlueTooth, Wifi, AI
+ - Current player turn
+ - Scorecard
+ - Boneyard
+ - Each player's hand
+ - Gameboard
+
+
+New 2 player game:
+
+ - Initiating player picks rules
+ - Initiating player pickes other player
+ - Create session object
+ - Find player with biggest double
+ - Auto-play largest double
+ - Set turn to other-player
+ - If non-local player is a Server type, send invitation
