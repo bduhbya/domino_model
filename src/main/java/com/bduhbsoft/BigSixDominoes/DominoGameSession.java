@@ -1,6 +1,5 @@
 package com.bduhbsoft.BigSixDominoes;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -14,12 +13,16 @@ import java.util.ArrayList;
 public class DominoGameSession {
 
     private ArrayList<DominoePlayer> mPlayers;
+    private DominoePlayer mWinner;
+    private DominoePlayer mPlayerResigned;
     private ArrayList<Dominoe> mBoneYard;
     private DominoeGameBoard mGameBoard;
     private DominoeGameOptions mOptions;
     private int mCurrentPlayer;
     private HashMap<DominoePlayer, ArrayList<Dominoe>> mPlayerHands;
     private DominoGameScoreboard mScoreboard;
+    private boolean mGameCompleted;
+    private boolean mGameLocked;
 
     public DominoGameSession(DominoeGameOptions options, ArrayList<DominoePlayer> players) {
         ArrayList<String> playerKeys = new ArrayList<>();
@@ -32,6 +35,8 @@ public class DominoGameSession {
             playerKeys.add(curPlayer.getUserName());
         }
         mScoreboard = new DominoGameScoreboard(playerKeys, mOptions.getScoreThreshold(), mOptions.getScoreMultiple());
+        mGameCompleted = false;
+        mGameLocked = false;
     }
 
 }

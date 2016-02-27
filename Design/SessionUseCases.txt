@@ -6,7 +6,9 @@ Session Data required:
  - Scorecard
  - Boneyard
  - Each player's hand
- - Gameboard
+ - Gameboard - consider changing to interface or abstract class
+ - GameCompleted
+ - Winner
 
 
 New 2 player game:
