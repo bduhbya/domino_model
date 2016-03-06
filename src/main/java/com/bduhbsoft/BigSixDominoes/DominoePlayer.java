@@ -1,12 +1,13 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 /**
 * Class DominoePlayer
 *
 * Defines a DominoePlayer
 */
 
-public class DominoePlayer {
+public class DominoePlayer implements Serializable {
     String mDisplayName;
     String mUserName;
     boolean mIsMyTurn;

@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 /**
 * Class DominoeGameOptions
 *
@@ -7,7 +8,7 @@ package com.bduhbsoft.BigSixDominoes;
 * colors of the board, skin for dominoes, scoring threshhold and so on
 */
 
-public class DominoeGameOptions {
+public class DominoeGameOptions implements Serializable {
 
     //Default options
     public static final int DEFAULT_PLAYERS = 2;

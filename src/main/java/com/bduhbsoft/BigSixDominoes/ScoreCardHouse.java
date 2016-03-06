@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
 /**
@@ -19,7 +20,7 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 * can only transition to a cross.  If a quadrant is empty it can take
 * either a line or a circle.
 */
-public class ScoreCardHouse {
+public class ScoreCardHouse implements Serializable {
     private QuadState[] mQuads; //State of each quadrant
     private boolean mHorBase; //Is horizontal base established?
     private boolean mVertBase; //Is vertical base established?

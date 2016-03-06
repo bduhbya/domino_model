@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,7 +10,7 @@ import java.util.HashMap;
 * Defines a Dominoe
 */
 
-public class Dominoe {
+public class Dominoe implements Serializable {
     private DominoSide mSide1;
     private DominoSide mSide2;
     private boolean mIsDouble;

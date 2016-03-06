@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 /*
 * Class DominoSide
 *
@@ -12,7 +13,7 @@ package com.bduhbsoft.BigSixDominoes;
 */
 
 
-public class DominoSide {
+public class DominoSide implements Serializable {
 
     public enum SideOrientation {
         North,

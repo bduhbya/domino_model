@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 * the game board, the dominoe set and the rule settings for the that session
 */
 
-public class DominoGameSession {
+public class DominoGameSession implements Serializable {
 
     private ArrayList<DominoePlayer> mPlayers;
     private DominoePlayer mWinner;

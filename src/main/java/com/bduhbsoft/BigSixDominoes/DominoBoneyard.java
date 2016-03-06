@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeSet;
@@ -17,7 +18,7 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 *
 */
 
-public class DominoBoneyard {
+public class DominoBoneyard implements Serializable {
 
     private ArrayList<Dominoe> mDominoes;
 

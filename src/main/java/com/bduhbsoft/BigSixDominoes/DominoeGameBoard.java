@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
@@ -12,7 +13,7 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 * in a score
 */
 
-public class DominoeGameBoard {
+public class DominoeGameBoard implements Serializable {
 
     private static final String TAG = "DominoeGameBoard";
     private static final int BAD_IDX = -1;

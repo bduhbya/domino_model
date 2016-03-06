@@ -1,5 +1,6 @@
 package com.bduhbsoft.BigSixDominoes;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
  * blindly add points after every turn to simplify the game logic.
  * */
 
-public class DominoGameScoreboard {
+public class DominoGameScoreboard implements Serializable {
 
     private Map<String, ArrayList<ScoreCardHouse>> mPlayerScoreCards;
     private static final int PLAYER_NOT_FOUND_POINTS = -1;
