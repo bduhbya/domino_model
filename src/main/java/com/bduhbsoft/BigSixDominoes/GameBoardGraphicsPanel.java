@@ -14,8 +14,8 @@ import java.awt.FontMetrics;
 import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
-import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
-import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
+import com.bduhbsoft.BigSixDominoes.Domino.SetType;
+import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.DominoGameScoreboard;
@@ -66,9 +66,9 @@ class GameBoardGraphicsPanel extends JPanel {
     private static final Color TITLE_COLOR = Color.BLUE;
     private static final Font TITLE_FONT = new Font("Monospaced", Font.PLAIN, TITLE_SIZE);
     private static final Font SCORE_FONT = new Font("Monospaced", Font.PLAIN, SCORE_SIZE);
-    private ArrayList<Dominoe> mRow;
-    private ArrayList<Dominoe> mCol;
-    private Dominoe mSpinner;
+    private ArrayList<Domino> mRow;
+    private ArrayList<Domino> mCol;
+    private Domino mSpinner;
     private int mPoints;
 
     //******************** Scorecard Drawing Data ****************************
@@ -158,7 +158,7 @@ class GameBoardGraphicsPanel extends JPanel {
         drawTitle(g);
     }
 
-    public void setBoard(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points) {
+    public void setBoard(ArrayList<Domino> row, ArrayList<Domino> col, Domino spinner, int points) {
         mRow = row;
         mCol = col;
         mSpinner = spinner;
@@ -184,7 +184,7 @@ class GameBoardGraphicsPanel extends JPanel {
 
         if(mRow != null) {
             //Doubles are drawn sideways
-            for(Dominoe curDom : mRow) {
+            for(Domino curDom : mRow) {
                 if(!curDom.isDouble()) {
                     rowLen += mDomLength;
                 } else {
@@ -228,7 +228,7 @@ class GameBoardGraphicsPanel extends JPanel {
         if(mCol != null) {
             //Doubles are drawn sideways, but the spinner is not drawn sideways with repsect
             //to the column
-            for(Dominoe curDom : mCol) {
+            for(Domino curDom : mCol) {
                 if(!curDom.isDouble() || curDom.equals(mSpinner)) {
                     colLen += mDomLength;
                 } else {
@@ -534,7 +534,7 @@ class GameBoardGraphicsPanel extends JPanel {
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawRow, starting row at: " + curX + "x" + curY);
         //Row y is the center line, so move half the size based on domino orintation
-        for(Dominoe dom : mRow) {
+        for(Domino dom : mRow) {
             if(dom.isDouble()) {
                 curY = dblY;
             } else {
@@ -558,7 +558,7 @@ class GameBoardGraphicsPanel extends JPanel {
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "drawCol, starting col at: " + curX + "x" + curY);
         //Col x is the center line, so move half the size based on domoino orientation
-        for(Dominoe dom : mCol) {
+        for(Domino dom : mCol) {
             if(dom.isDouble() && !dom.equals(mSpinner)) {
                 curX = dblX;
             } else {
@@ -699,7 +699,7 @@ class GameBoardGraphicsPanel extends JPanel {
         return;
     }
 
-    private void drawDominoe(Graphics g, int startX, int startY, Dominoe dom) {
+    private void drawDominoe(Graphics g, int startX, int startY, Domino dom) {
         int curX = startX, curY = startY;
         int adjStartX = startX + mOutlineW, adjStartY = startY + mOutlineW;
 

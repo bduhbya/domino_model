@@ -2,7 +2,7 @@ package com.bduhbsoft.BigSixDominoes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
+import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
 /*
@@ -25,12 +25,12 @@ public class DominoGameBoard implements Serializable {
 
     //For the row:      WEST        EAST
     //                 mRow[0] ... mRow[N]
-    private ArrayList<Dominoe> mRow;
+    private ArrayList<Domino> mRow;
 
     //For the column:   NORTH           SOUTH
     //                 mColumn[0] ... mColumn[N]
-    private ArrayList<Dominoe> mColumn;
-    private Dominoe mSpinner;
+    private ArrayList<Domino> mColumn;
+    private Domino mSpinner;
 
     //Internal tracking variables
     private boolean            mIsEmpty;
@@ -38,7 +38,7 @@ public class DominoGameBoard implements Serializable {
     //If the last domino was not committed or removed, the board is not open to accept
     //another domino
     private boolean            mBoardOpen;
-    private Dominoe            mLastDom;
+    private Domino            mLastDom;
 
     //**************************Public Interface*****************************
 
@@ -79,8 +79,8 @@ public class DominoGameBoard implements Serializable {
         WEST
     }
 
-    void printList(ArrayList<Dominoe> list) {
-        for(Dominoe dom : list) {
+    void printList(ArrayList<Domino> list) {
+        for(Domino dom : list) {
             Logging.LogMsg(LogLevel.TRACE, TAG, "    " + dom);
         }
     }
@@ -135,16 +135,16 @@ public class DominoGameBoard implements Serializable {
      * The game rules, board type and current configuration determine if adding the domino
      * is valid.
      * 
-     * @param Dominoe     : The specific domino to add to the game board
+     * @param Domino     : The specific domino to add to the game board
      * @param EdgeLocation: Edge (or side) of the current configuration to add
      *                      the domino.  Note that when the board is empty, the specified
      *                      edge location will effect the domino orientation.
      * @return boolean    : True if the domino was added.  False if the domino could not be added
      */
-    public boolean putDominoe(Dominoe theDominoe, EdgeLocation location) {
+    public boolean putDomino(Domino theDomino, EdgeLocation location) {
         boolean success = false;
         int idx = 0, addIdx = 0;;
-        ArrayList<Dominoe> curList = null;
+        ArrayList<Domino> curList = null;
         Orientation targetOrtn = null;
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe");
@@ -156,18 +156,18 @@ public class DominoGameBoard implements Serializable {
         //Board is empty, set east and west pointers at least.  If double, then
         //also process as the first double.  If empty, board location is implied
         if (mIsEmpty) {
-            Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, empty board, adding domino: " + theDominoe);
+            Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, empty board, adding domino: " + theDomino);
             mIsEmpty = false;
             success = true;
-            mRow = new ArrayList<Dominoe>();
+            mRow = new ArrayList<Domino>();
 
-            if (theDominoe.isDouble()) {
-                setSpinner(theDominoe, getWestAddIdx());
+            if (theDomino.isDouble()) {
+                setSpinner(theDomino, getWestAddIdx());
             } else {
                 Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, added domino to row as only domino");
                 targetOrtn = (location == EdgeLocation.EAST) ? Orientation.SIDE1_EAST : Orientation.SIDE1_WEST;
-                theDominoe.setOrientation(targetOrtn);
-                addDomino(theDominoe, mRow, 0);
+                theDomino.setOrientation(targetOrtn);
+                addDomino(theDomino, mRow, 0);
             }
 
             return success;
@@ -216,17 +216,17 @@ public class DominoGameBoard implements Serializable {
                        + ", index: " + idx);
 
         if(idx != BAD_IDX) {
-            if(checkMatch(theDominoe, curList.get(idx), targetOrtn)) {
+            if(checkMatch(theDomino, curList.get(idx), targetOrtn)) {
                 String domList = "";
-                if(mSpinner == null && theDominoe.isDouble()) {
-                    setSpinner(theDominoe, addIdx);
+                if(mSpinner == null && theDomino.isDouble()) {
+                    setSpinner(theDomino, addIdx);
                 } else {
-                    addDomino(theDominoe, curList, addIdx);
+                    addDomino(theDomino, curList, addIdx);
                 }
 
                 success = true;
                 Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, added domino to list, new list:");
-                for(Dominoe dom : curList) {
+                for(Domino dom : curList) {
                     if(dom.getOrientation() == Orientation.SIDE1_NORTH || 
                        dom.getOrientation() == Orientation.SIDE1_WEST    ) {
                         domList += "" + dom.getSide1() + "|" + dom.getSide2() + "  ";
@@ -237,7 +237,7 @@ public class DominoGameBoard implements Serializable {
                 }
                 Logging.LogMsg(LogLevel.TRACE, TAG, "    " + domList);
             } else {
-                Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, rejected domino: " + theDominoe);
+                Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, rejected domino: " + theDomino);
             }
         }
 
@@ -249,18 +249,18 @@ public class DominoGameBoard implements Serializable {
     /**
      * Returns the current board row.
      * <p>
-     * @return ArrayList<Dominoe> : Row of the game board
+     * @return ArrayList<Domino> : Row of the game board
      */
-    public ArrayList<Dominoe> getRow() {
+    public ArrayList<Domino> getRow() {
         return mRow;
     }
 
     /**
      * Returns the current board column.
      * <p>
-     * @return ArrayList<Dominoe> : Column of the game board
+     * @return ArrayList<Domino> : Column of the game board
      */
-    public ArrayList<Dominoe> getColumn() {
+    public ArrayList<Domino> getColumn() {
         return mColumn;
     }
 
@@ -275,9 +275,9 @@ public class DominoGameBoard implements Serializable {
     /**
      * Returns the current spinner
      * <p>
-     * @return Dominoe : Board spinner
+     * @return Domino : Board spinner
      */
-    public Dominoe getSpinner() {
+    public Domino getSpinner() {
         return mSpinner;
     }
 
@@ -309,7 +309,7 @@ public class DominoGameBoard implements Serializable {
     public int getPerimTotal() {
         int eastVal = 0, westVal = 0, northVal = 0, southVal = 0;
         int eastIdx, westIdx, northIdx, southIdx;
-        Dominoe curDom;
+        Domino curDom;
 
         eastIdx = getEastIdx();
         //THe row is ALWAYS created and if it doesn't exist, the board should be empty
@@ -426,24 +426,24 @@ public class DominoGameBoard implements Serializable {
         Logging.LogMsg(LogLevel.DEBUG, TAG, "updatedSpinnerFlanked, spinner is flanked: " + mSpinnerFlanked);
     }
 
-    private void addDomino(Dominoe dom, ArrayList<Dominoe> curList, int idx) {
+    private void addDomino(Domino dom, ArrayList<Domino> curList, int idx) {
         mBoardOpen = false;
         mLastDom = dom;
         curList.add(idx, dom);
     }
 
-    private void setSpinner(Dominoe theDominoe, int rowIdx) {
+    private void setSpinner(Domino theDomino, int rowIdx) {
         Logging.LogMsg(LogLevel.TRACE, TAG, "setSpinner first double played");
-        theDominoe.setOrientation(Orientation.SIDE1_NORTH);
-        mColumn = new ArrayList<Dominoe>();
-        addDomino(theDominoe, mColumn, 0);
-        mSpinner = theDominoe;
+        theDomino.setOrientation(Orientation.SIDE1_NORTH);
+        mColumn = new ArrayList<Domino>();
+        addDomino(theDomino, mColumn, 0);
+        mSpinner = theDomino;
 
         //Add to row
-        addDomino(theDominoe, mRow, rowIdx);
+        addDomino(theDomino, mRow, rowIdx);
     }
 
-    boolean checkMatch(Dominoe newDom, Dominoe boardDom, Orientation targetOrtn) {
+    boolean checkMatch(Domino newDom, Domino boardDom, Orientation targetOrtn) {
         boolean success = false;
         int curSide = 0;
         boolean matchSd1 = false;
@@ -524,7 +524,7 @@ public class DominoGameBoard implements Serializable {
         return success;
     }
 
-    private int getSpinnerIdx(ArrayList<Dominoe> list) {
+    private int getSpinnerIdx(ArrayList<Domino> list) {
         if(list == null || mSpinner == null) {
             return BAD_IDX;
         }
@@ -532,7 +532,7 @@ public class DominoGameBoard implements Serializable {
         return list.indexOf(mSpinner);
     }
 
-    private int getEdgeVal(Dominoe curDom, Orientation ortn, EdgeLocation edge) {
+    private int getEdgeVal(Domino curDom, Orientation ortn, EdgeLocation edge) {
         int retVal = 0;
         if(curDom.isDouble()) {
             return curDom.getSide1() + curDom.getSide2();

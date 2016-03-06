@@ -10,7 +10,7 @@ import java.util.HashMap;
 * Defines a Dominoe
 */
 
-public class Dominoe implements Serializable {
+public class Domino implements Serializable {
     private DominoSide mSide1;
     private DominoSide mSide2;
     private boolean mIsDouble;
@@ -38,54 +38,54 @@ public class Dominoe implements Serializable {
     //Public helpers
     public static int NUM_DLB_SIX_DOMINOES = 28;
 
-    public static ArrayList<Dominoe> getDominoeSet(SetType setType) {
+    public static ArrayList<Domino> getDominoeSet(SetType setType) {
         //TODO: case statement
         return getDoubleSixSet();
     }
 
-    private static ArrayList<Dominoe> getDoubleSixSet() {
-        ArrayList<Dominoe> set = new ArrayList<Dominoe>();
+    private static ArrayList<Domino> getDoubleSixSet() {
+        ArrayList<Domino> set = new ArrayList<Domino>();
 
         //Create double six set
-        set.add(new Dominoe(0, 0));
-        set.add(new Dominoe(0, 1));
-        set.add(new Dominoe(0, 2));
-        set.add(new Dominoe(0, 3));
-        set.add(new Dominoe(0, 4));
-        set.add(new Dominoe(0, 5));
-        set.add(new Dominoe(0, 6));
+        set.add(new Domino(0, 0));
+        set.add(new Domino(0, 1));
+        set.add(new Domino(0, 2));
+        set.add(new Domino(0, 3));
+        set.add(new Domino(0, 4));
+        set.add(new Domino(0, 5));
+        set.add(new Domino(0, 6));
 
-        set.add(new Dominoe(1, 1));
-        set.add(new Dominoe(1, 2));
-        set.add(new Dominoe(1, 3));
-        set.add(new Dominoe(1, 4));
-        set.add(new Dominoe(1, 5));
-        set.add(new Dominoe(1, 6));
+        set.add(new Domino(1, 1));
+        set.add(new Domino(1, 2));
+        set.add(new Domino(1, 3));
+        set.add(new Domino(1, 4));
+        set.add(new Domino(1, 5));
+        set.add(new Domino(1, 6));
 
-        set.add(new Dominoe(2, 2));
-        set.add(new Dominoe(2, 3));
-        set.add(new Dominoe(2, 4));
-        set.add(new Dominoe(2, 5));
-        set.add(new Dominoe(2, 6));
+        set.add(new Domino(2, 2));
+        set.add(new Domino(2, 3));
+        set.add(new Domino(2, 4));
+        set.add(new Domino(2, 5));
+        set.add(new Domino(2, 6));
 
-        set.add(new Dominoe(3, 3));
-        set.add(new Dominoe(3, 4));
-        set.add(new Dominoe(3, 5));
-        set.add(new Dominoe(3, 6));
+        set.add(new Domino(3, 3));
+        set.add(new Domino(3, 4));
+        set.add(new Domino(3, 5));
+        set.add(new Domino(3, 6));
 
-        set.add(new Dominoe(4, 4));
-        set.add(new Dominoe(4, 5));
-        set.add(new Dominoe(4, 6));
+        set.add(new Domino(4, 4));
+        set.add(new Domino(4, 5));
+        set.add(new Domino(4, 6));
 
-        set.add(new Dominoe(5, 5));
-        set.add(new Dominoe(5, 6));
+        set.add(new Domino(5, 5));
+        set.add(new Domino(5, 6));
 
-        set.add(new Dominoe(6, 6));
+        set.add(new Domino(6, 6));
 
         return set;
     }
 
-    public Dominoe(int side1, int side2) {
+    public Domino(int side1, int side2) {
         mSide1 = new DominoSide(side1);
         mSide2 = new DominoSide(side2);
         mIsDouble = mSide1.equals(mSide2);
@@ -125,7 +125,7 @@ public class Dominoe implements Serializable {
         return mSide1.getValue() + "|" + mSide2.getValue();
     }
 
-    public boolean equals(Dominoe rhs) {
+    public boolean equals(Domino rhs) {
         return
             ( (this.mSide1.equals(rhs.getDomSide1())) &&
               (this.mSide2.equals(rhs.getDomSide2()))   ) ||

@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
-import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
-import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
+import com.bduhbsoft.BigSixDominoes.Domino.SetType;
+import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse.QuadState;
@@ -30,7 +30,7 @@ public class FunctionalTesting {
     private final static String TAG = "FunctionalTesting";
     private final static String FAILED_MSG = "FAIL";
     private final static String PASSED_MSG = "PASS";
-    private final static String TEST_BOARD_CLASS = "Dominoe Board Class Test";
+    private final static String TEST_BOARD_CLASS = "Domino Board Class Test";
     private final static int PASS_CTR = 0;
     private final static int FAIL_CTR = 1;
     private final static int PASS_FAIL_CNDS = 2;
@@ -111,7 +111,7 @@ public class FunctionalTesting {
         }
     }
 
-    private void refreshGameboardDisplay(ArrayList<Dominoe> row, ArrayList<Dominoe> col, Dominoe spinner, int points, String testName) {
+    private void refreshGameboardDisplay(ArrayList<Domino> row, ArrayList<Domino> col, Domino spinner, int points, String testName) {
 
         if(mRunGuiTests) {
             mPanel.setBoard(row, col, spinner, points);
@@ -129,7 +129,7 @@ public class FunctionalTesting {
         mTstClassSuccess = true;
     }
 
-    private boolean testAddDominoes(Dominoe[] dom, int[] expectedTtl, boolean[] expectedSuccess,
+    private boolean testAddDominoes(Domino[] dom, int[] expectedTtl, boolean[] expectedSuccess,
                                     DominoGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
         boolean success = true, tempResult = false;
         int curTtl = 0;
@@ -140,7 +140,7 @@ public class FunctionalTesting {
         }
 
         for(int idx = 0; idx < dom.length; idx++) {
-            tempResult = board.putDominoe(dom[idx], addLoc[idx]);
+            tempResult = board.putDomino(dom[idx], addLoc[idx]);
 
             if(tempResult != expectedSuccess[idx]) {
                 success = false;
@@ -304,9 +304,9 @@ public class FunctionalTesting {
         if(success) success = tempSuccess;
         tempSuccess = testBoneYard();
         if(success) success = tempSuccess;
-        tempSuccess = testDominoePlayer();
+        tempSuccess = testDominoPlayer();
         if(success) success = tempSuccess;
-        tempSuccess = testDominoeGameOptions(this);
+        tempSuccess = testDominoGameOptions(this);
         if(success) success = tempSuccess;
         tempSuccess = testScoreCardHouse(this);
         if(success) success = tempSuccess;
@@ -365,7 +365,7 @@ public class FunctionalTesting {
         return test.mTstClassSuccess;
     }
 
-    public boolean testDominoeGameOptions(FunctionalTesting test) {
+    public boolean testDominoGameOptions(FunctionalTesting test) {
         boolean success = true;
         final String TEST_CLASS_NAME = "DominoGameBoardOptions Class Tests";
 
@@ -382,25 +382,25 @@ public class FunctionalTesting {
         return test.mTstClassSuccess;
     }
 
-    public boolean testDominoePlayer() {
+    public boolean testDominoPlayer() {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
         ArrayList<String> messages = new ArrayList<String>();
         final String name = "Test Player", userName = "TestUname";
-        final DominoePlayer.PlayerType pType = DominoePlayer.PlayerType.Server;
+        final DominoPlayer.PlayerType pType = DominoPlayer.PlayerType.Server;
         final boolean initialTurn = false, setTurn = true;
         final int initialScore = 0, setNewScore = 15;
-        DominoePlayer player;
-        final String TEST_CLASS = "DominoePlayer class testing";
+        DominoPlayer player;
+        final String TEST_CLASS = "DominoPlayer class testing";
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
-        Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoePlayer Class Tests");
+        Logging.LogMsg(LogLevel.INFO, TAG, "Running DominoPlayer Class Tests");
 
         //TODO: Consider removing these test as it only tests getting/setting which is a JVM operation.  Should probably
         //TODO: only test actual logic if any makes it way into the player class
 
         //Case new player with default values
-        player = new DominoePlayer(name, userName, pType);
+        player = new DominoPlayer(name, userName, pType);
         if(player.getDisplayName() != name) {
             success = false;
             messages.add("Display name mismatch.  Constructed with: " + name + ", got: " + player.getDisplayName());
@@ -421,7 +421,7 @@ public class FunctionalTesting {
             messages.add("Score mismatch.  Expected initial value:  " + initialScore + ", got: " + player.getScore());
         }
 
-        logSuccess(success, "DominoePlayer: New player object", messages, passFailCtr);
+        logSuccess(success, "DominoPlayer: New player object", messages, passFailCtr);
 
         //Case set isMyTurn
         tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
@@ -435,7 +435,7 @@ public class FunctionalTesting {
             messages.add("My turn mismatch.  Set value:  " + setTurn + ", got: " + player.isMyTurn());
         }
 
-        logSuccess(success, "DominoePlayer: Set player turn status", messages, passFailCtr);
+        logSuccess(success, "DominoPlayer: Set player turn status", messages, passFailCtr);
 
         //Case set setScore
         tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
@@ -449,7 +449,7 @@ public class FunctionalTesting {
             messages.add("Score mismatch.  Expected initial value:  " + setNewScore + ", got: " + player.getScore());
         }
 
-        logSuccess(success, "DominoePlayer: Set player score", messages, passFailCtr);
+        logSuccess(success, "DominoPlayer: Set player score", messages, passFailCtr);
 
         tstClassSuccess = checkGroupSuccess(tstClassSuccess, success);
         logSummary(TEST_CLASS, tstClassSuccess, passFailCtr);
@@ -462,10 +462,10 @@ public class FunctionalTesting {
         boolean success = true, tstClassSuccess = true;
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
         int yardSize, newYardSize;
-        Dominoe tempDom1, tempDom2;
-        ArrayList<Dominoe> domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
+        Domino tempDom1, tempDom2;
+        ArrayList<Domino> domSet = Domino.getDominoeSet(SetType.DOUBLE_SIX);
         DominoBoneyard yard = new DominoBoneyard();
-        ArrayList<Dominoe> copyList;
+        ArrayList<Domino> copyList;
         ArrayList<String> messages = new ArrayList<String>();
         final String TEST_CLASS = "DominoBoneyard class testing";
 
@@ -512,7 +512,7 @@ public class FunctionalTesting {
 
 //      TODO: Figure out why this breaks compilation
 //        @SuppressWarnings("unchecked")
-        copyList = (ArrayList<Dominoe>)(yard.getYard().clone());
+        copyList = (ArrayList<Domino>)(yard.getYard().clone());
         yard.washYard();
         Logging.LogMsg(LogLevel.TRACE, "DominoBoneyard: Init boneyard", "copyList |  yard list");
         for(int idx = 0; idx < yardSize; idx++) {
@@ -541,8 +541,8 @@ public class FunctionalTesting {
         //Check that all original domioes are still present
         int origIdx = 0;
         boolean[] found = new boolean[copyList.size()];
-        for(Dominoe origDom: copyList) {
-            for(Dominoe curDom: yard.getYard()) {
+        for(Domino origDom: copyList) {
+            for(Domino curDom: yard.getYard()) {
                 if(origDom.equals(curDom)) {
                     found[origIdx] = true;
                     break;
@@ -603,13 +603,13 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            Dominoe tempDom;
+            Domino tempDom;
             ArrayList<String> messages = new ArrayList<String>();
             int dblSide1 = 0, dblSide2 = 0;
             final String TEST_NAME = "Dominoe: Create new double";
 
             //Case create new double
-            tempDom = new Dominoe(dblSide1, dblSide2);
+            tempDom = new Domino(dblSide1, dblSide2);
             messages.add("Testing double: " + tempDom);
             if(!tempDom.isDouble()) {
                 success = false;
@@ -629,13 +629,13 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            Dominoe tempDom;
+            Domino tempDom;
             ArrayList<String> messages = new ArrayList<String>();
             int regSide1 = 2, regSide2 = 3;
             final String TEST_NAME = "Dominoe: Create new non-double";
 
             //Case create non-double
-            tempDom = new Dominoe(regSide1, regSide2);
+            tempDom = new Domino(regSide1, regSide2);
             messages.add("Testing non-double: " + tempDom);
             if(tempDom.isDouble()) {
                 success = false;
@@ -655,13 +655,13 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            Dominoe tempDom;
+            Domino tempDom;
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "Dominoe: Set and get orientation";
 
             //Case set and get orientation
-            tempDom = new Dominoe(0,0);
-            for(Dominoe.Orientation curOrtn : Dominoe.Orientation.values()) {
+            tempDom = new Domino(0,0);
+            for(Domino.Orientation curOrtn : Domino.Orientation.values()) {
                 tempDom.setOrientation(curOrtn);
                 if(tempDom.getOrientation() != curOrtn) {
                     success = false;
@@ -677,11 +677,11 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
             ArrayList<String> messages = new ArrayList<String>();
-            ArrayList<Dominoe> domSet;
+            ArrayList<Domino> domSet;
             final String TEST_NAME = "Dominoe: Get set of type " + SetType.DOUBLE_SIX;
 
             //Case get dominoe set
-            domSet = Dominoe.getDominoeSet(SetType.DOUBLE_SIX);
+            domSet = Domino.getDominoeSet(SetType.DOUBLE_SIX);
 
             if(domSet == null) {
                 success = false;
@@ -689,7 +689,7 @@ public class FunctionalTesting {
             }
 
             //TODO: Lookup clever java way to validate all dominoes are present in set
-            for(Dominoe dom : domSet) {
+            for(Domino dom : domSet) {
                 messages.add("Dominoe: " + dom);
             }
 
@@ -702,26 +702,26 @@ public class FunctionalTesting {
         
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            DominoeGameOptions options = null;
+            DominoGameOptions options = null;
             final String TEST_NAME = "DominoGameBoardOptions: Create options object";
             ArrayList<String> messages = new ArrayList<>();
 
-            options = new DominoeGameOptions(DominoeGameOptions.DEFAULT_PLAYERS,
-                                             DominoeGameOptions.SCORE_THRESHOLD,
-                                             DominoeGameOptions.MIN_START_SCORE,
-                                             DominoeGameOptions.DOM_PER_HAND,
-                                             DominoeGameOptions.SCORE_MULTIPLE);
+            options = new DominoGameOptions(DominoGameOptions.DEFAULT_PLAYERS,
+                                             DominoGameOptions.SCORE_THRESHOLD,
+                                             DominoGameOptions.MIN_START_SCORE,
+                                             DominoGameOptions.DOM_PER_HAND,
+                                             DominoGameOptions.SCORE_MULTIPLE);
 
-            if(options.getNumPlayers()       != DominoeGameOptions.DEFAULT_PLAYERS ||
-               options.getScoreThreshold()   != DominoeGameOptions.SCORE_THRESHOLD ||
-               options.getMinStartingScore() != DominoeGameOptions.MIN_START_SCORE ||
-               options.getScoreMultiple()    != DominoeGameOptions.SCORE_MULTIPLE  ||
-               options.getNumDomPerHand()    != DominoeGameOptions.DOM_PER_HAND       ) {
-                messages.add("Options do not match created values, expected num players: " + DominoeGameOptions.DEFAULT_PLAYERS +
-                             ", found: " + options.getNumPlayers() + ", expected threshold: " + DominoeGameOptions.SCORE_THRESHOLD +
-                             ", found: " + options.getScoreThreshold() + ", expected starting score: " + DominoeGameOptions.MIN_START_SCORE +
-                             ", found: " + options.getMinStartingScore() + ", expected dominoes per hand: " + DominoeGameOptions.DOM_PER_HAND +
-                             ", found: " + options.getNumDomPerHand() + ", expected scoring multiple: " + DominoeGameOptions.SCORE_MULTIPLE +
+            if(options.getNumPlayers()       != DominoGameOptions.DEFAULT_PLAYERS ||
+               options.getScoreThreshold()   != DominoGameOptions.SCORE_THRESHOLD ||
+               options.getMinStartingScore() != DominoGameOptions.MIN_START_SCORE ||
+               options.getScoreMultiple()    != DominoGameOptions.SCORE_MULTIPLE  ||
+               options.getNumDomPerHand()    != DominoGameOptions.DOM_PER_HAND       ) {
+                messages.add("Options do not match created values, expected num players: " + DominoGameOptions.DEFAULT_PLAYERS +
+                             ", found: " + options.getNumPlayers() + ", expected threshold: " + DominoGameOptions.SCORE_THRESHOLD +
+                             ", found: " + options.getScoreThreshold() + ", expected starting score: " + DominoGameOptions.MIN_START_SCORE +
+                             ", found: " + options.getMinStartingScore() + ", expected dominoes per hand: " + DominoGameOptions.DOM_PER_HAND +
+                             ", found: " + options.getNumDomPerHand() + ", expected scoring multiple: " + DominoGameOptions.SCORE_MULTIPLE +
                              ", found: " + options.getScoreMultiple());
                 success = false;
             }
@@ -1408,8 +1408,8 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            ArrayList<Dominoe> row = null, col = null;
-            Dominoe curDom;
+            ArrayList<Domino> row = null, col = null;
+            Domino curDom;
             ArrayList<String> messages = new ArrayList<String>();
             int dblSide1 = 1, dblSide2 = 1;
             int regSide1 = 2, regSide2 = 3;
@@ -1417,8 +1417,8 @@ public class FunctionalTesting {
             String title;
 
             //Case: put double domino on empty board
-            curDom = new Dominoe(dblSide1, dblSide2);
-            tempResult = board.putDominoe(curDom, EdgeLocation.NORTH);
+            curDom = new Domino(dblSide1, dblSide2);
+            tempResult = board.putDomino(curDom, EdgeLocation.NORTH);
 
             //If board says it's empty, the test is failed or if board failed to put domino on empty board
             if(!tempResult) {
@@ -1484,7 +1484,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(3, 2), new Dominoe(6, 5), new Dominoe(2, 1)};
+            Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(3, 2), new Domino(6, 5), new Domino(2, 1)};
             int expectedTtl[]          = new int[]          {               12,                15,                14,                 7,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              true,              true};
@@ -1502,7 +1502,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 4)};
+            Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 4)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
@@ -1520,7 +1520,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
+            Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
@@ -1543,7 +1543,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 2), new Dominoe(6, 3), new Dominoe(2, 2)};
+            Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.EAST, EdgeLocation.EAST, EdgeLocation.WEST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
@@ -1566,7 +1566,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 4), new Dominoe(4, 3), new Dominoe(6, 6)};
+            Domino curDom[]           = new Domino[]      {new Domino(6, 4), new Domino(4, 3), new Domino(6, 6)};
             int expectedTtl[]          = new int[]          {               10,                 9,                15};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true};
@@ -1589,7 +1589,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+            Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
@@ -1612,7 +1612,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(6, 6), new Dominoe(6, 3), new Dominoe(5, 6),  new Dominoe(4, 6)};
+            Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
@@ -1635,7 +1635,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
+            Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
@@ -1653,7 +1653,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0),  new Dominoe(5, 1)};
+            Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.SOUTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              false};
@@ -1671,7 +1671,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
+            Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
@@ -1689,7 +1689,7 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(6, 1)};
+            Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,              false};
@@ -1707,23 +1707,23 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3), new Dominoe(3, 0)};
+            Domino curDom[]           = new Domino[]      {new Domino(3, 3), new Domino(3, 0)};
             int expectedTtl[]          = new int[]          {                6,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
             boolean expectedSuc[]      = new boolean[]      {             true,              true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Add domino without committing last domino";
-            Dominoe tempDom;
+            Domino tempDom;
             EdgeLocation tempLoc;
 
             //Case: Test playing a domino when last domino was not committed to the board
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            tempDom = new Dominoe(2, 3);
+            tempDom = new Domino(2, 3);
             tempLoc = EdgeLocation.WEST;
-            if(success && board.putDominoe(tempDom, tempLoc)) {
-                tempDom = new Dominoe(2, 4);
-                if(board.putDominoe(tempDom, tempLoc)) {
+            if(success && board.putDomino(tempDom, tempLoc)) {
+                tempDom = new Domino(2, 4);
+                if(board.putDomino(tempDom, tempLoc)) {
                     success = false;
                     messages.add("Able to add domino: " + tempDom + ", to edge: " + tempLoc + ", expected add to fail");
                 }
@@ -1742,17 +1742,17 @@ public class FunctionalTesting {
             DominoGameBoard board = new DominoGameBoard();
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove spinner as first played domino";
-            Dominoe tempDom;
+            Domino tempDom;
             EdgeLocation tempLoc;
 
-            tempDom = new Dominoe(3, 3);
+            tempDom = new Domino(3, 3);
             tempLoc = EdgeLocation.WEST;
-            if(board.putDominoe(tempDom, tempLoc)) {
+            if(board.putDomino(tempDom, tempLoc)) {
                 //Expect board to be empty
                 board.removeLast();
-                ArrayList<Dominoe> row = board.getRow();
-                ArrayList<Dominoe> col = board.getColumn();
-                Dominoe spinner = board.getSpinner();
+                ArrayList<Domino> row = board.getRow();
+                ArrayList<Domino> col = board.getColumn();
+                Domino spinner = board.getSpinner();
                 if(row != null || col != null || spinner != null) {
                     success = false;
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
@@ -1771,17 +1771,17 @@ public class FunctionalTesting {
             DominoGameBoard board = new DominoGameBoard();
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove non-spinner as first played domino";
-            Dominoe tempDom;
+            Domino tempDom;
             EdgeLocation tempLoc;
 
-            tempDom = new Dominoe(2, 1);
+            tempDom = new Domino(2, 1);
             tempLoc = EdgeLocation.WEST;
-            if(board.putDominoe(tempDom, tempLoc)) {
+            if(board.putDomino(tempDom, tempLoc)) {
                 //Expect board to be empty
                 board.removeLast();
-                ArrayList<Dominoe> row = board.getRow();
-                ArrayList<Dominoe> col = board.getColumn();
-                Dominoe spinner = board.getSpinner();
+                ArrayList<Domino> row = board.getRow();
+                ArrayList<Domino> col = board.getColumn();
+                Domino spinner = board.getSpinner();
                 if(row != null || col != null || spinner != null) {
                     success = false;
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
@@ -1798,23 +1798,23 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(3, 3)};
+            Domino curDom[]           = new Domino[]      {new Domino(3, 3)};
             int expectedTtl[]          = new int[]          {                6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST};
             boolean expectedSuc[]      = new boolean[]      {             true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove row domino from existing row";
-            Dominoe tempDom;
+            Domino tempDom;
             EdgeLocation tempLoc;
 
             //Case: Simply add the double, then play and remove one
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            tempDom = new Dominoe(3, 0);
+            tempDom = new Domino(3, 0);
             tempLoc = EdgeLocation.WEST;
             int prevRowSize =  board.getRow().size();
             int prevTotal = expectedTtl[expectedTtl.length - 1];
-            if(success && board.putDominoe(tempDom, tempLoc)) {
+            if(success && board.putDomino(tempDom, tempLoc)) {
                 board.removeLast();
                 int curTotal = board.getPerimTotal();
                 int curRowSize = board.getRow().size();
@@ -1836,24 +1836,24 @@ public class FunctionalTesting {
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
             DominoGameBoard board = new DominoGameBoard();
-            Dominoe curDom[]           = new Dominoe[]      {new Dominoe(5, 5), new Dominoe(5, 0), new Dominoe(5, 1),  new Dominoe(5, 2)};
+            Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(5, 2)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  3};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
             boolean expectedSuc[]      = new boolean[]      {             true,              true,              true,               true};
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove column domino from existing row";
-            Dominoe tempDom;
+            Domino tempDom;
             EdgeLocation tempLoc;
 
             //Case: Simply add the double, then play and remove one
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            tempDom = new Dominoe(2, 1);
+            tempDom = new Domino(2, 1);
             tempLoc = EdgeLocation.SOUTH;
             int prevRowSize =  board.getRow().size();
             int prevColSize =  board.getColumn().size();
             int prevTotal = expectedTtl[expectedTtl.length - 1];
-            if(success && board.putDominoe(tempDom, tempLoc)) {
+            if(success && board.putDomino(tempDom, tempLoc)) {
                 board.removeLast();
                 int curTotal = board.getPerimTotal();
                 int curRowSize = board.getRow().size();

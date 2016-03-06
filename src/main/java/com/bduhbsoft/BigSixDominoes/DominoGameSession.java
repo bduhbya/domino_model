@@ -13,26 +13,26 @@ import java.util.ArrayList;
 
 public class DominoGameSession implements Serializable {
 
-    private ArrayList<DominoePlayer> mPlayers;
-    private DominoePlayer mWinner;
-    private DominoePlayer mPlayerResigned;
-    private ArrayList<Dominoe> mBoneYard;
+    private ArrayList<DominoPlayer> mPlayers;
+    private DominoPlayer mWinner;
+    private DominoPlayer mPlayerResigned;
+    private ArrayList<Domino> mBoneYard;
     private DominoGameBoard mGameBoard;
-    private DominoeGameOptions mOptions;
+    private DominoGameOptions mOptions;
     private int mCurrentPlayer;
-    private HashMap<DominoePlayer, ArrayList<Dominoe>> mPlayerHands;
+    private HashMap<DominoPlayer, ArrayList<Domino>> mPlayerHands;
     private DominoGameScoreboard mScoreboard;
     private boolean mGameCompleted;
     private boolean mGameLocked;
 
-    public DominoGameSession(DominoeGameOptions options, ArrayList<DominoePlayer> players) {
+    public DominoGameSession(DominoGameOptions options, ArrayList<DominoPlayer> players) {
         ArrayList<String> playerKeys = new ArrayList<>();
         mOptions = options;
         mPlayers = players;
         mGameBoard = new DominoGameBoard();
-        mBoneYard = new ArrayList<Dominoe>();
+        mBoneYard = new ArrayList<Domino>();
         mPlayerHands = new HashMap<>();
-        for(DominoePlayer curPlayer : mPlayers) {
+        for(DominoPlayer curPlayer : mPlayers) {
             playerKeys.add(curPlayer.getUserName());
         }
         mScoreboard = new DominoGameScoreboard(playerKeys, mOptions.getScoreThreshold(), mOptions.getScoreMultiple());

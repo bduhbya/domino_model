@@ -2,13 +2,13 @@ package com.bduhbsoft.BigSixDominoes;
 
 import java.io.Serializable;
 /**
-* Class DominoeGameOptions
+* Class DominoGameOptions
 *
 * Contains the options for a given game.  Things like the number of players,
 * colors of the board, skin for dominoes, scoring threshhold and so on
 */
 
-public class DominoeGameOptions implements Serializable {
+public class DominoGameOptions implements Serializable {
 
     //Default options
     public static final int DEFAULT_PLAYERS = 2;
@@ -31,7 +31,7 @@ public class DominoeGameOptions implements Serializable {
     /**
     * Constructor expects all options
     */
-    public DominoeGameOptions(int numPlayers, int scoreThreshold, int startScore, int domPerHand, int scoreMult) {
+    public DominoGameOptions(int numPlayers, int scoreThreshold, int startScore, int domPerHand, int scoreMult) {
         mNumPlayers = numPlayers;
         mScoreThreshold = scoreThreshold;
         mMinStartingScore = startScore;

@@ -2,12 +2,12 @@ package com.bduhbsoft.BigSixDominoes;
 
 import java.io.Serializable;
 /**
-* Class DominoePlayer
+* Class DominoPlayer
 *
-* Defines a DominoePlayer
+* Defines a DominoPlayer
 */
 
-public class DominoePlayer implements Serializable {
+public class DominoPlayer implements Serializable {
     String mDisplayName;
     String mUserName;
     boolean mIsMyTurn;
@@ -48,7 +48,7 @@ public class DominoePlayer implements Serializable {
     *
     * @param userName Players official username
     */ 
-    public DominoePlayer(String displayName, String userName, PlayerType type) {
+    public DominoPlayer(String displayName, String userName, PlayerType type) {
         mUserName = userName;
         mDisplayName = displayName;
         mIsMyTurn = false;

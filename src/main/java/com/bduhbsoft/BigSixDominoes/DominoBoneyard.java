@@ -20,19 +20,19 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
 public class DominoBoneyard implements Serializable {
 
-    private ArrayList<Dominoe> mDominoes;
+    private ArrayList<Domino> mDominoes;
 
     public DominoBoneyard() {
         return;
     }
 
     //Sets bone yard contents
-    public void setYard(ArrayList<Dominoe> dominoes) {
+    public void setYard(ArrayList<Domino> dominoes) {
         mDominoes = dominoes;
     }
 
     //Removes domino from the board
-    public Dominoe removeDomino() {
+    public Domino removeDomino() {
         if(mDominoes != null && mDominoes.size() > 0) {
             return mDominoes.remove(0);
         }
@@ -41,7 +41,7 @@ public class DominoBoneyard implements Serializable {
     }
 
     //Utility function fot testing
-    public ArrayList<Dominoe> getYard() {
+    public ArrayList<Domino> getYard() {
         return mDominoes;
     }
 
@@ -98,7 +98,7 @@ public class DominoBoneyard implements Serializable {
         //The array of random indexes serves as mapping from the original
         //list to the new list.  The new list is then saved as the member
         //list of the object.
-        ArrayList<Dominoe> newDoms = new ArrayList<Dominoe>();
+        ArrayList<Domino> newDoms = new ArrayList<Domino>();
         int[] newIdxs = getUniqueRandNumList(0, mDominoes.size() - 1);
 
         for(int idx = 0; idx < mDominoes.size(); idx++) {
