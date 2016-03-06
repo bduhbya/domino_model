@@ -17,7 +17,7 @@ public class DominoGameSession implements Serializable {
     private DominoePlayer mWinner;
     private DominoePlayer mPlayerResigned;
     private ArrayList<Dominoe> mBoneYard;
-    private DominoeGameBoard mGameBoard;
+    private DominoGameBoard mGameBoard;
     private DominoeGameOptions mOptions;
     private int mCurrentPlayer;
     private HashMap<DominoePlayer, ArrayList<Dominoe>> mPlayerHands;
@@ -29,7 +29,7 @@ public class DominoGameSession implements Serializable {
         ArrayList<String> playerKeys = new ArrayList<>();
         mOptions = options;
         mPlayers = players;
-        mGameBoard = new DominoeGameBoard();
+        mGameBoard = new DominoGameBoard();
         mBoneYard = new ArrayList<Dominoe>();
         mPlayerHands = new HashMap<>();
         for(DominoePlayer curPlayer : mPlayers) {

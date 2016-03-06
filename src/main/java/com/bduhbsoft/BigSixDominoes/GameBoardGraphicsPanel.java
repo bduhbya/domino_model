@@ -16,7 +16,7 @@ import java.util.Set;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Dominoe.SetType;
 import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
-import com.bduhbsoft.BigSixDominoes.DominoeGameBoard.EdgeLocation;
+import com.bduhbsoft.BigSixDominoes.DominoGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.DominoGameScoreboard;
 

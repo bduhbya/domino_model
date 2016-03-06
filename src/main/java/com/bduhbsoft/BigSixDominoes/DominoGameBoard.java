@@ -6,16 +6,16 @@ import com.bduhbsoft.BigSixDominoes.Dominoe.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
 /*
-* Class DominoeGameBoard
+* Class DominoGameBoard
 *
 * Implements the game board the dominoes are played on.  It enforces
 * if a dominoe can be played and determines if a given play results
 * in a score
 */
 
-public class DominoeGameBoard implements Serializable {
+public class DominoGameBoard implements Serializable {
 
-    private static final String TAG = "DominoeGameBoard";
+    private static final String TAG = "DominoGameBoard";
     private static final int BAD_IDX = -1;
 
     //The board only consists of one row and one column.  ArrayList provides
@@ -42,7 +42,7 @@ public class DominoeGameBoard implements Serializable {
 
     //**************************Public Interface*****************************
 
-    public DominoeGameBoard() {
+    public DominoGameBoard() {
         mRow = mColumn = null;
         mIsEmpty = true;
         mSpinner = null;
