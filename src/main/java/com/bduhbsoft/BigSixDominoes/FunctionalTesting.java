@@ -940,6 +940,64 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple, usingMultiple  , usingMultiple  , usingMultiple  , usingMultiple  };
+            String players[]          = new String[]  {player2      , player2        , player2        , player2        , player2        };
+            int expectedTtl[]         = new int[]     {usingMultiple, usingMultiple*2, usingMultiple*3, usingMultiple*4, usingMultiple*5};
+            boolean expectedSuccess[] = new boolean[] {true         , true           , true           , true           , true           };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add score for one player in multiples of 5";
+
+            int leftOver = expectedTtl[expectedTtl.length-1];
+            int curHouse = 0;
+            do {
+                expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                curHouse++;
+            } while(leftOver > 0);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            String player1 = "Player 1", player2 = "Player 2";
+            ArrayList<String> gamePlayers = new ArrayList<>();
+            gamePlayers.add(player1);
+            gamePlayers.add(player2);
+            int usingMultiple = ScoreCardHouse.DEFAULT_MULTIPLE;
+            DominoGameScoreboard scoreBoard = new DominoGameScoreboard(gamePlayers, DEFAULT_THRESHOLD);
+            ArrayList<String> messages = new ArrayList<String>();
+            int addPoints[]           = new int[]     {usingMultiple, usingMultiple  , usingMultiple  , usingMultiple  , usingMultiple  , usingMultiple*5 };
+            String players[]          = new String[]  {player2      , player2        , player2        , player2        , player2        , player2         };
+            int expectedTtl[]         = new int[]     {usingMultiple, usingMultiple*2, usingMultiple*3, usingMultiple*4, usingMultiple*5, usingMultiple*10};
+            boolean expectedSuccess[] = new boolean[] {true         , true           , true           , true           , true           , true            };
+            ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
+            final String TEST_NAME = "DominoGameScoreboard: Add score for one player mixing Xs and Os, requiring single play split accross an X";
+
+            int leftOver = expectedTtl[expectedTtl.length-1];
+            int curHouse = 0;
+            do {
+                expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                curHouse++;
+            } while(leftOver > 0);
+            success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
+
+            return success;
         }}
     };
 
