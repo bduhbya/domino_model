@@ -1,6 +1,7 @@
 package com.bduhbsoft.BigSixDominoes;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFrame;
 import java.awt.Graphics;
 import javax.swing.JPanel;
@@ -16,7 +17,7 @@ import java.util.Set;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Domino.SetType;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
-import com.bduhbsoft.BigSixDominoes.DominoGameBoard.EdgeLocation;
+import com.bduhbsoft.BigSixDominoes.DominoMultiPlayerGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.DominoGameScoreboard;
 
@@ -66,8 +67,8 @@ class GameBoardGraphicsPanel extends JPanel {
     private static final Color TITLE_COLOR = Color.BLUE;
     private static final Font TITLE_FONT = new Font("Monospaced", Font.PLAIN, TITLE_SIZE);
     private static final Font SCORE_FONT = new Font("Monospaced", Font.PLAIN, SCORE_SIZE);
-    private ArrayList<Domino> mRow;
-    private ArrayList<Domino> mCol;
+    private List<Domino> mRow;
+    private List<Domino> mCol;
     private Domino mSpinner;
     private int mPoints;
 
@@ -158,7 +159,7 @@ class GameBoardGraphicsPanel extends JPanel {
         drawTitle(g);
     }
 
-    public void setBoard(ArrayList<Domino> row, ArrayList<Domino> col, Domino spinner, int points) {
+    public void setBoard(List<Domino> row, List<Domino> col, Domino spinner, int points) {
         mRow = row;
         mCol = col;
         mSpinner = spinner;

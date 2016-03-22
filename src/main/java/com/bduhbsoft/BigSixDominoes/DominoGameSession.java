@@ -17,7 +17,7 @@ public class DominoGameSession implements Serializable {
     private DominoPlayer mWinner;
     private DominoPlayer mPlayerResigned;
     private ArrayList<Domino> mBoneYard;
-    private DominoGameBoard mGameBoard;
+    private DominoMultiPlayerGameBoard mGameBoard;
     private DominoGameOptions mOptions;
     private int mCurrentPlayer;
     private HashMap<DominoPlayer, ArrayList<Domino>> mPlayerHands;
@@ -29,7 +29,7 @@ public class DominoGameSession implements Serializable {
         ArrayList<String> playerKeys = new ArrayList<>();
         mOptions = options;
         mPlayers = players;
-        mGameBoard = new DominoGameBoard();
+//        mGameBoard = new DominoMultiPlayerGameBoard(); TODO: Factory to get correct type based on game type
         mBoneYard = new ArrayList<Domino>();
         mPlayerHands = new HashMap<>();
         for(DominoPlayer curPlayer : mPlayers) {

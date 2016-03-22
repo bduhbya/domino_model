@@ -2,6 +2,7 @@ package com.bduhbsoft.BigSixDominoes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
@@ -13,9 +14,9 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 * in a score
 */
 
-public class DominoGameBoard implements Serializable {
+public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
 
-    private static final String TAG = "DominoGameBoard";
+    private static final String TAG = CHILD_TAG = "DominoGameBoardDoubleSix";
     private static final int BAD_IDX = -1;
 
     //The board only consists of one row and one column.  ArrayList provides
@@ -33,56 +34,16 @@ public class DominoGameBoard implements Serializable {
     private Domino mSpinner;
 
     //Internal tracking variables
-    private boolean            mIsEmpty;
     private boolean            mSpinnerFlanked;
-    //If the last domino was not committed or removed, the board is not open to accept
-    //another domino
-    private boolean            mBoardOpen;
-    private Domino            mLastDom;
 
     //**************************Public Interface*****************************
 
-    public DominoGameBoard() {
+    public DominoGameBoardDoubleSix() {
+        super();
         mRow = mColumn = null;
-        mIsEmpty = true;
         mSpinner = null;
         mSpinnerFlanked = false;
-        mBoardOpen = true;
         Logging.LogMsg(LogLevel.TRACE, TAG, "Constructor");
-    }
-
-    // Location assuming two dimentional north-down view of the game board and refering
-    // to the edges of the dominoe layout on the board.  Example visualization:
-    //
-    //                   NORTH
-    //                    ---
-    //                   | 1 |
-    //                    ---
-    //                   | 5 |
-    //                    ---
-    //         WEST       ---        EAST
-    //           --- --- | 5 | --- ---
-    //          | 0 | 5 | --- | 5 | 2 |
-    //           --- --- | 5 | --- ---
-    //                    ---
-    //                    ---
-    //                   | 5 |
-    //                    ---
-    //                   | 3 |
-    //                    ---
-    //                   SOUTH
-    //
-    public enum EdgeLocation {
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST
-    }
-
-    void printList(ArrayList<Domino> list) {
-        for(Domino dom : list) {
-            Logging.LogMsg(LogLevel.TRACE, TAG, "    " + dom);
-        }
     }
 
     /**
@@ -128,24 +89,13 @@ public class DominoGameBoard implements Serializable {
         mLastDom = null;
     }
 
-    /**
-     * Attempts to add a domino to the game board, but does not commit the domino.
-     * <p>
-     * Returns true on successful result.
-     * The game rules, board type and current configuration determine if adding the domino
-     * is valid.
-     * 
-     * @param Domino     : The specific domino to add to the game board
-     * @param EdgeLocation: Edge (or side) of the current configuration to add
-     *                      the domino.  Note that when the board is empty, the specified
-     *                      edge location will effect the domino orientation.
-     * @return boolean    : True if the domino was added.  False if the domino could not be added
-     */
     public boolean putDomino(Domino theDomino, EdgeLocation location) {
         boolean success = false;
         int idx = 0, addIdx = 0;;
         ArrayList<Domino> curList = null;
         Orientation targetOrtn = null;
+
+        //TODO: Throw exception for unsupported edge values
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe");
         if(!mBoardOpen) {
@@ -210,6 +160,9 @@ public class DominoGameBoard implements Serializable {
                 curList = mRow;
                 targetOrtn = Orientation.SIDE1_WEST;
                 break;
+
+            default:
+                return false;
         }
 
         Logging.LogMsg(LogLevel.TRACE, TAG, "putDominoe, board not empty, adding domino to board area: " + location
@@ -246,30 +199,20 @@ public class DominoGameBoard implements Serializable {
         return success;
     }
 
-    /**
-     * Returns the current board row.
-     * <p>
-     * @return ArrayList<Domino> : Row of the game board
-     */
-    public ArrayList<Domino> getRow() {
-        return mRow;
-    }
+    //TODO: Throw exception
+    public List<Domino> getDomList(EdgeLocation location) {
+        switch(location) {
+            case NORTH:
+            case SOUTH:
+                return mColumn;
 
-    /**
-     * Returns the current board column.
-     * <p>
-     * @return ArrayList<Domino> : Column of the game board
-     */
-    public ArrayList<Domino> getColumn() {
-        return mColumn;
-    }
+            case EAST:
+            case WEST:
+                return mRow;
 
-    private int getEastAddIdx() {
-        if(mRow == null) {
-            return BAD_IDX;
+            default:
+                return null; //TODO: Throw exception
         }
-
-        return mRow.size();
     }
 
     /**
@@ -281,31 +224,10 @@ public class DominoGameBoard implements Serializable {
         return mSpinner;
     }
 
-
-    //TODO: Consider making private
-    public int getSpinnerRow() {
-        return getSpinnerIdx(mRow);
+    public Domino getPivotDom() {
+        return mSpinner;
     }
 
-    //TODO: Consider making private
-    public int getSpinnerColumn() {
-        return getSpinnerIdx(mColumn);
-    }
-
-    /**
-     * Returns board empty status
-     * <p>
-     * @return boolean : Status of board being empty
-     */
-    public boolean isEmpty() {
-        return mIsEmpty;
-    }
-
-    /**
-     * Returns board perimeter value
-     * <p>
-     * @return int : Current perimeter value
-     */
     public int getPerimTotal() {
         int eastVal = 0, westVal = 0, northVal = 0, southVal = 0;
         int eastIdx, westIdx, northIdx, southIdx;
@@ -361,6 +283,22 @@ public class DominoGameBoard implements Serializable {
     }
 
     //********************************Private Functions*********************************
+    private int getSpinnerRow() {
+        return getSpinnerIdx(mRow);
+    }
+
+    private int getSpinnerColumn() {
+        return getSpinnerIdx(mColumn);
+    }
+
+    private int getEastAddIdx() {
+        if(mRow == null) {
+            return BAD_IDX;
+        }
+
+        return mRow.size();
+    }
+
     private int getWestAddIdx() {
         if(mRow == null) {
             return BAD_IDX;

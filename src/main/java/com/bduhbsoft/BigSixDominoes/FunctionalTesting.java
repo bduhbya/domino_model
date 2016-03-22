@@ -2,6 +2,7 @@ package com.bduhbsoft.BigSixDominoes;
 
 import javax.swing.JFrame;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import javax.swing.AbstractButton;
@@ -15,7 +16,7 @@ import java.util.Set;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Domino.SetType;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
-import com.bduhbsoft.BigSixDominoes.DominoGameBoard.EdgeLocation;
+import com.bduhbsoft.BigSixDominoes.DominoMultiPlayerGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse.QuadState;
 
@@ -111,7 +112,7 @@ public class FunctionalTesting {
         }
     }
 
-    private void refreshGameboardDisplay(ArrayList<Domino> row, ArrayList<Domino> col, Domino spinner, int points, String testName) {
+    private void refreshGameboardDisplay(List<Domino> row, List<Domino> col, Domino spinner, int points, String testName) {
 
         if(mRunGuiTests) {
             mPanel.setBoard(row, col, spinner, points);
@@ -130,7 +131,7 @@ public class FunctionalTesting {
     }
 
     private boolean testAddDominoes(Domino[] dom, int[] expectedTtl, boolean[] expectedSuccess,
-                                    DominoGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
+                                    DominoMultiPlayerGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
         boolean success = true, tempResult = false;
         int curTtl = 0;
         String title = testName;
@@ -157,7 +158,7 @@ public class FunctionalTesting {
         }
 
         title += ": " + (success ? "SUCCESS" : "FAILED");
-        refreshGameboardDisplay(board.getRow(), board.getColumn(), board.getSpinner(), curTtl, title);
+        refreshGameboardDisplay(board.getDomList(EdgeLocation.WEST), board.getDomList(EdgeLocation.NORTH), board.getPivotDom(), curTtl, title);
 
         return success;
     }
@@ -294,7 +295,7 @@ public class FunctionalTesting {
         //TODO: Refactor to be like gameboard tests in array
         if(!mRunGuiTests) {
             Logging.LogMsg(LogLevel.TRACE, TAG, "runAutomatedTests, running GUI test without GUI");
-            tempSuccess = testDominoGameBoard(this);
+            tempSuccess = testDominoGameBoardDoubleSix(this);
             if(success) success = tempSuccess;
             tempSuccess = testDominoGameScoreboard(this);
             if(success) success = tempSuccess;
@@ -348,16 +349,16 @@ public class FunctionalTesting {
         return test.mTstClassSuccess;
     }
 
-    public boolean testDominoGameBoard(FunctionalTesting test) {
+    public boolean testDominoGameBoardDoubleSix(FunctionalTesting test) {
         boolean success = true;
-        final String TEST_CLASS_NAME = "DominoGameBoard Class Tests";
+        final String TEST_CLASS_NAME = "DominoGameBoardDoubleSix Class Tests";
 
         Logging.LogMsg(LogLevel.INFO, TAG, "");
         Logging.LogMsg(LogLevel.INFO, TAG, "Running: " + TEST_CLASS_NAME);
 
         test.resetTestMetrics();
 
-        for(IFunctionalTest curTest : mGameBoardTests) {
+        for(IFunctionalTest curTest : mDoubleSixGameBoardTests) {
              test.mTstClassSuccess = checkGroupSuccess(test.mTstClassSuccess, curTest.runTest(test));
         }
 
@@ -1403,12 +1404,12 @@ public class FunctionalTesting {
     };
 
     //GameBoard test bodies
-    public static IFunctionalTest[] mGameBoardTests = {
+    public static IFunctionalTest[] mDoubleSixGameBoardTests = {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
-            ArrayList<Domino> row = null, col = null;
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            List<Domino> row = null, col = null;
             Domino curDom;
             ArrayList<String> messages = new ArrayList<String>();
             int dblSide1 = 1, dblSide2 = 1;
@@ -1431,9 +1432,9 @@ public class FunctionalTesting {
                 success = false;
             }
 
-            //Check that the row and column have the dominoe and the spinner is correctly located
-            row = board.getRow();
-            col = board.getColumn();
+            //Check that the row and column have the domino and the spinner is correctly located
+            row = board.getDomList(EdgeLocation.WEST);
+            col = board.getDomList(EdgeLocation.NORTH);
             if(row == null) {
                 messages.add("Row is null after adding first domino");
                 success = false;
@@ -1447,24 +1448,26 @@ public class FunctionalTesting {
             if(row != null && col != null) {
                 if(!curDom.equals(row.get(0))) {
                     success = false;
-                    messages.add("Domino added to board doens't match row domino, expected: " + curDom + " - actual: " + row.get(0));
+                    messages.add("Domino added to board doesn't match row domino, expected: " + curDom + " - actual: " + row.get(0));
                 }
 
                 if(!curDom.equals(col.get(0))) {
                     success = false;
-                    messages.add("Domino added to board doens't match col domino, expected: " + curDom + " - actual: " + col.get(0));
+                    messages.add("Domino added to board doesn't match col domino, expected: " + curDom + " - actual: " + col.get(0));
                 }
             }
 
             //Check spinner index
-            if(board.getSpinnerRow() != 0) {
+            int pivotIdx = row.indexOf(curDom);
+            if(pivotIdx != 0) {
                 success = false;
-                messages.add("Spinner row incorrect.  Expected: 0 - Found: " + board.getSpinnerRow());
+                messages.add("Spinner row incorrect.  Expected: 0 - Found: " + pivotIdx);
             }
 
-            if(board.getSpinnerColumn() != 0) {
+            pivotIdx = col.indexOf(curDom);
+            if(pivotIdx != 0) {
                 success = false;
-                messages.add("Spinner column incorrect.  Expected: 0 - Found: " + board.getSpinnerColumn());
+                messages.add("Spinner column incorrect.  Expected: 0 - Found: " + pivotIdx);
             }
 
             //Check board total
@@ -1476,14 +1479,14 @@ public class FunctionalTesting {
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
-            test.refreshGameboardDisplay(row, col, board.getSpinner(), board.getPerimTotal(), title);
+            test.refreshGameboardDisplay(row, col, board.getPivotDom(), board.getPerimTotal(), title);
 
             return success;
         }},
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(3, 2), new Domino(6, 5), new Domino(2, 1)};
             int expectedTtl[]          = new int[]          {               12,                15,                14,                 7,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1501,7 +1504,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 4)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1519,7 +1522,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1530,7 +1533,7 @@ public class FunctionalTesting {
             //Case: Create a row of dominoes with the spinner the last dominoe on the east side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            if(board.getSpinner() == null) {
+            if(board.getPivotDom() == null) {
                 messages.add("Spinner is null.  Expected spinner to be present.");
                 success = false;
             }
@@ -1542,7 +1545,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.EAST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1553,7 +1556,7 @@ public class FunctionalTesting {
             //Case: Create a row of dominoes with the spinner the last dominoe on the east side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            if(board.getSpinner() == null) {
+            if(board.getPivotDom() == null) {
                 messages.add("Spinner is null.  Expected spinner to be present.");
                 success = false;
             }
@@ -1565,7 +1568,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(6, 4), new Domino(4, 3), new Domino(6, 6)};
             int expectedTtl[]          = new int[]          {               10,                 9,                15};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1576,7 +1579,7 @@ public class FunctionalTesting {
             //Case: Create a row of dominoes with the spiiner as the last domoinoe on the west side
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            if(board.getSpinner() == null) {
+            if(board.getPivotDom() == null) {
                 messages.add("Spinner is null.  Expected spinner to be present.");
                 success = false;
             }
@@ -1588,7 +1591,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
@@ -1599,7 +1602,7 @@ public class FunctionalTesting {
             //Case: Test playing the spinner on the North side. This requires row dominoes flanking the spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            if(board.getSpinner() == null) {
+            if(board.getPivotDom() == null) {
                 messages.add("Spinner is null.  Expected spinner to be present.");
                 success = false;
             }
@@ -1611,7 +1614,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
@@ -1622,7 +1625,7 @@ public class FunctionalTesting {
             //Case: Test playing the spinner on the South side. This requires row dominoes flanking the spinner
             success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
 
-            if(board.getSpinner() == null) {
+            if(board.getPivotDom() == null) {
                 messages.add("Spinner is null.  Expected spinner to be present.");
                 success = false;
             }
@@ -1634,7 +1637,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH};
@@ -1652,7 +1655,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.SOUTH};
@@ -1670,7 +1673,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
@@ -1688,7 +1691,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
@@ -1706,7 +1709,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(3, 3), new Domino(3, 0)};
             int expectedTtl[]          = new int[]          {                6,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1739,7 +1742,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove spinner as first played domino";
             Domino tempDom;
@@ -1750,9 +1753,9 @@ public class FunctionalTesting {
             if(board.putDomino(tempDom, tempLoc)) {
                 //Expect board to be empty
                 board.removeLast();
-                ArrayList<Domino> row = board.getRow();
-                ArrayList<Domino> col = board.getColumn();
-                Domino spinner = board.getSpinner();
+                List<Domino> row = board.getDomList(EdgeLocation.WEST);
+                List<Domino> col = board.getDomList(EdgeLocation.NORTH);
+                Domino spinner = board.getPivotDom();
                 if(row != null || col != null || spinner != null) {
                     success = false;
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
@@ -1768,7 +1771,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove non-spinner as first played domino";
             Domino tempDom;
@@ -1779,9 +1782,9 @@ public class FunctionalTesting {
             if(board.putDomino(tempDom, tempLoc)) {
                 //Expect board to be empty
                 board.removeLast();
-                ArrayList<Domino> row = board.getRow();
-                ArrayList<Domino> col = board.getColumn();
-                Domino spinner = board.getSpinner();
+                List<Domino> row = board.getDomList(EdgeLocation.WEST);
+                List<Domino> col = board.getDomList(EdgeLocation.NORTH);
+                Domino spinner = board.getPivotDom();
                 if(row != null || col != null || spinner != null) {
                     success = false;
                     messages.add("Non-null detectd after removing spinner, row: " + ((row == null) ? "NULL" : "NOT NULL") +
@@ -1797,7 +1800,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(3, 3)};
             int expectedTtl[]          = new int[]          {                6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST};
@@ -1812,12 +1815,12 @@ public class FunctionalTesting {
 
             tempDom = new Domino(3, 0);
             tempLoc = EdgeLocation.WEST;
-            int prevRowSize =  board.getRow().size();
+            int prevRowSize =  board.getDomList(EdgeLocation.WEST).size();
             int prevTotal = expectedTtl[expectedTtl.length - 1];
             if(success && board.putDomino(tempDom, tempLoc)) {
                 board.removeLast();
                 int curTotal = board.getPerimTotal();
-                int curRowSize = board.getRow().size();
+                int curRowSize = board.getDomList(EdgeLocation.WEST).size();
                 if(curTotal != prevTotal || prevRowSize != curRowSize) {
                     messages.add("Total or row size mismatch. Total before add/remove: " + prevTotal + ", cur total: " + curTotal +
                         ", row count before add/remove: " + prevRowSize + ", cur count: " + curRowSize);
@@ -1835,7 +1838,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoGameBoard board = new DominoGameBoard();
+            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(5, 2)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  3};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
@@ -1850,13 +1853,13 @@ public class FunctionalTesting {
 
             tempDom = new Domino(2, 1);
             tempLoc = EdgeLocation.SOUTH;
-            int prevRowSize =  board.getRow().size();
-            int prevColSize =  board.getColumn().size();
+            int prevRowSize =  board.getDomList(EdgeLocation.WEST).size();
+            int prevColSize =  board.getDomList(EdgeLocation.NORTH).size();
             int prevTotal = expectedTtl[expectedTtl.length - 1];
             if(success && board.putDomino(tempDom, tempLoc)) {
                 board.removeLast();
                 int curTotal = board.getPerimTotal();
-                int curRowSize = board.getRow().size();
+                int curRowSize = board.getDomList(EdgeLocation.WEST).size();
                 if(curTotal != prevTotal || prevRowSize != curRowSize) {
                     messages.add("Total or row size mismatch. Total before add/remove: " + prevTotal + ", cur total: " + curTotal +
                         ", row count before add/remove: " + prevRowSize + ", cur count: " + curRowSize);
@@ -1937,7 +1940,7 @@ public class FunctionalTesting {
 
     static {
         mGuiTests.add(mDominoGameScoreboardTests);
-        mGuiTests.add(mGameBoardTests);
+        mGuiTests.add(mDoubleSixGameBoardTests);
     }
 
 
