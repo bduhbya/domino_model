@@ -6,12 +6,12 @@ import java.util.List;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
-/*
-* Class DominoGameBoard
+/**
+* Class DominoGameBoardDoubleSix
 *
-* Implements the game board the dominoes are played on.  It enforces
+* Implements the game board for double six domino game variant.  It enforces
 * if a dominoe can be played and determines if a given play results
-* in a score
+* in a score.
 */
 
 public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {

@@ -19,6 +19,8 @@ import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoMultiPlayerGameBoard.EdgeLocation;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse.QuadState;
+import com.bduhbsoft.BigSixDominoes.MultiPlayerGameBoardFactory;
+import com.bduhbsoft.BigSixDominoes.MultiPlayerGameBoardFactory.GameType;
 
 /*
 * Class FunctionalTesting
@@ -958,13 +960,17 @@ public class FunctionalTesting {
             ArrayList<ScoreCardHouse> expectedHouses = new ArrayList<>(); //Only checked after all plays made since house class tested seperately
             final String TEST_NAME = "DominoGameScoreboard: Add score for one player in multiples of 5";
 
-            int leftOver = expectedTtl[expectedTtl.length-1];
+            int leftOver;
             int curHouse = 0;
-            do {
-                expectedHouses.add(new ScoreCardHouse(usingMultiple));
-                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
-                curHouse++;
-            } while(leftOver > 0);
+            expectedHouses.add(new ScoreCardHouse(usingMultiple));
+            for(int curPoints : addPoints) {
+                leftOver = expectedHouses.get(curHouse).addPoints(curPoints);
+                while(leftOver > 0) {
+                    ++curHouse;
+                    expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                    leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                }
+            }
             success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
@@ -989,11 +995,15 @@ public class FunctionalTesting {
 
             int leftOver = expectedTtl[expectedTtl.length-1];
             int curHouse = 0;
-            do {
-                expectedHouses.add(new ScoreCardHouse(usingMultiple));
-                leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
-                curHouse++;
-            } while(leftOver > 0);
+            expectedHouses.add(new ScoreCardHouse(usingMultiple));
+            for(int curPoints : addPoints) {
+                leftOver = expectedHouses.get(curHouse).addPoints(curPoints);
+                while(leftOver > 0) {
+                    ++curHouse;
+                    expectedHouses.add(new ScoreCardHouse(usingMultiple));
+                    leftOver = expectedHouses.get(curHouse).addPoints(leftOver);
+                }
+            }
             success = test.testScoreCardAddPoints(scoreBoard, addPoints, players, gamePlayers.size(), expectedTtl, expectedSuccess, expectedHouses, DEFAULT_THRESHOLD, messages, TEST_NAME);
             logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
@@ -1466,7 +1476,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             List<Domino> row = null, col = null;
             Domino curDom;
             ArrayList<String> messages = new ArrayList<String>();
@@ -1544,7 +1554,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(3, 2), new Domino(6, 5), new Domino(2, 1)};
             int expectedTtl[]          = new int[]          {               12,                15,                14,                 7,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1562,7 +1572,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 4)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1580,7 +1590,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1603,7 +1613,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(3, 2), new Domino(6, 3), new Domino(2, 2)};
             int expectedTtl[]          = new int[]          {                5,                 8,                10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.EAST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1626,7 +1636,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(6, 4), new Domino(4, 3), new Domino(6, 6)};
             int expectedTtl[]          = new int[]          {               10,                 9,                15};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST};
@@ -1649,7 +1659,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
@@ -1672,7 +1682,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(6, 6), new Domino(6, 3), new Domino(5, 6),  new Domino(4, 6)};
             int expectedTtl[]          = new int[]          {               12,                15,                 8,                 12};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
@@ -1695,7 +1705,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH};
@@ -1713,7 +1723,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0),  new Domino(5, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 10};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.SOUTH};
@@ -1731,7 +1741,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.NORTH};
@@ -1749,7 +1759,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(6, 1)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  1};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};
@@ -1767,7 +1777,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(3, 3), new Domino(3, 0)};
             int expectedTtl[]          = new int[]          {                6,                 6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST};
@@ -1800,7 +1810,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove spinner as first played domino";
             Domino tempDom;
@@ -1829,7 +1839,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             ArrayList<String> messages = new ArrayList<String>();
             final String TEST_NAME = "DominoGameBoard: Remove non-spinner as first played domino";
             Domino tempDom;
@@ -1858,7 +1868,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(3, 3)};
             int expectedTtl[]          = new int[]          {                6};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST};
@@ -1896,7 +1906,7 @@ public class FunctionalTesting {
 
         new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
             boolean success = true, tempResult = false;
-            DominoMultiPlayerGameBoard board = new DominoGameBoardDoubleSix();
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
             Domino curDom[]           = new Domino[]      {new Domino(5, 5), new Domino(5, 0), new Domino(5, 1),  new Domino(5, 2)};
             int expectedTtl[]          = new int[]          {               10,                10,                 1,                  3};
             EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.WEST, EdgeLocation.SOUTH};

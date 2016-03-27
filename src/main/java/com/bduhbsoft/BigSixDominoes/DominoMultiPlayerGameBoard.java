@@ -6,12 +6,10 @@ import java.util.List;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 
-/*
-* Class DominoGameBoard
+/**
+* Abstract Class DominoMultiPlayerGameBoard
 *
-* Implements the game board the dominoes are played on.  It enforces
-* if a dominoe can be played and determines if a given play results
-* in a score
+* Defines generic domino board for multi-player games.
 */
 
 public abstract class DominoMultiPlayerGameBoard implements Serializable {
@@ -130,17 +128,6 @@ public abstract class DominoMultiPlayerGameBoard implements Serializable {
      * @return Pivot domino for the board
      */
     public abstract Domino getPivotDom();
-
-
-    //TODO: Consider making private
-//    public int getSpinnerRow() {
-//        return getSpinnerIdx(mRow);
-//    }
-
-    //TODO: Consider making private
-//    public int getSpinnerColumn() {
-//        return getSpinnerIdx(mColumn);
-//    }
 
     /**
      * Returns board empty status
