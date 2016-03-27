@@ -78,25 +78,29 @@ public class DominoGameScoreboard implements Serializable {
     }
 
     /**
-    * Adds specified number of points to a player's score.
+    * Adds specified number of points to a player's score.  Throws exception if
+    * player is not in the board
     *
     * @param player Name of player that scored. MUST match player used in 
     * the constructor
     *
     * @param points Points added for the given player
     *
-    * @return True if player found and points attempted to be added, false otherwise
+    * @return Points succesfully added.  If the points do not match the configured
+    * scoring multiple, returns 0
     */
-    public boolean addPoints(String player, int points) {
-        boolean found = false;
+    public int addPoints(String player, int points) throws IllegalArgumentException {
         boolean validScore = false;
         if(checkPlayer(player)) {
             validScore = addPlayerPoints(player, points);
-            found = true;
+        } else {
+            throw new IllegalArgumentException("Player: " + player + ", not on board");
         }
 
-        //TODO: Consider adding callback for valid score
-        return found;
+        if(validScore)
+            return points;
+        else
+            return 0;
     }
 
     /**

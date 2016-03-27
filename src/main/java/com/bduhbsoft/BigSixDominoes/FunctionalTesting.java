@@ -230,6 +230,7 @@ public class FunctionalTesting {
         int total;
         int actualThreshold;
         int expectedMaxHouses;
+        int reportedScore;
         String title = testName;
         String lastPlayer = "";
 
@@ -239,7 +240,26 @@ public class FunctionalTesting {
 
         for(int idx = 0; idx < addPoints.length; idx++) {
             lastPlayer = player[idx];
-            tempSuccess = scoreCard.addPoints(lastPlayer, addPoints[idx]);
+            tempSuccess = true;
+            reportedScore = 0;
+
+            try {
+                reportedScore = scoreCard.addPoints(lastPlayer, addPoints[idx]);
+            } catch(IllegalArgumentException e) {
+                tempSuccess = false;
+                messages.add("Caught exception adding points for player: " + lastPlayer);
+            }
+
+            if(tempSuccess) {
+                if(((addPoints[idx] % scoreCard.getScoringMultiple()) == 0) && addPoints[idx] != reportedScore) {
+                    success = false;
+                    messages.add("Valid points added to board: " + addPoints[idx] + ", do not match reported points: " + reportedScore);
+                } else if(((addPoints[idx] % scoreCard.getScoringMultiple()) != 0) && reportedScore != 0) {
+                    success = false;
+                    messages.add("Invalid points added to board: " + addPoints[idx] + ", reported points non-zero: " + reportedScore);
+                }
+            }
+
             if(tempSuccess != expectedSuccess[idx]) {
                 success = false;
                 messages.add(tempSuccess ? "ABLE" : "NOT ABLE" + " to add points " + addPoints[idx] + "for player: " + 
