@@ -11,3 +11,4 @@ Code here is intended to flesh out the basic mechanics of:
 - Drawing the basic bone yard
 - Saving a game
 - Having players make a play
+- Determining if board is locked
