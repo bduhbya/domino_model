@@ -62,6 +62,17 @@ public class FunctionalTesting {
     private boolean mTstClassSuccess;
     private boolean mRunGuiTests;
 
+    private class MultiPlayerBoardTestData {
+        DominoMultiPlayerGameBoard board;
+        Domino curDom[];
+        EdgeLocation addLocation[];
+        int expectedTtl[];
+        boolean expectedSuc[];
+        EdgeLocation addLoc[];
+        ArrayList<String> messages;
+        String testName;
+    }
+
     public FunctionalTesting() {
         mCurEventBasedFunctionalTestGroup = 0;
         mCurEventBasedFunctionalTest = 0;
@@ -132,8 +143,9 @@ public class FunctionalTesting {
         mTstClassSuccess = true;
     }
 
-    private boolean testAddDominoes(Domino[] dom, int[] expectedTtl, boolean[] expectedSuccess,
-                                    DominoMultiPlayerGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
+    private boolean testAddDominoes(MultiPlayerBoardTestData testData) {
+//    private boolean testAddDominoes(Domino[] dom, int[] expectedTtl, boolean[] expectedSuccess,
+//                                    DominoMultiPlayerGameBoard board, EdgeLocation[] addLoc, ArrayList<String> messages, String testName) {
         boolean success = true, tempResult = false;
         int curTtl = 0;
         String title = testName;
@@ -142,25 +154,25 @@ public class FunctionalTesting {
             title = "No Test Name";
         }
 
-        for(int idx = 0; idx < dom.length; idx++) {
-            tempResult = board.putDomino(dom[idx], addLoc[idx]);
+        for(int idx = 0; idx < testData.dom.length; idx++) {
+            tempResult = testData.board.putDomino(testData.dom[idx], testData.addLoc[idx]);
 
-            if(tempResult != expectedSuccess[idx]) {
+            if(tempResult != testData.expectedSuccess[idx]) {
                 success = false;
                 messages.add("Board " + (tempResult ? "accepcted" : "rejected") + " domino: " +
-                             dom[idx] + ", expected board to " + (expectedSuccess[idx] ? "accecpt" : "reject") + " domino");
+                             testData.dom[idx] + ", expected board to " + (testData.expectedSuccess[idx] ? "accecpt" : "reject") + " domino");
             }
 
-            curTtl = board.getPerimTotal();
-            if(curTtl != expectedTtl[idx]) {
+            curTtl = testData.board.getPerimTotal();
+            if(curTtl != testData.expectedTtl[idx]) {
                 success = false;
-                messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + expectedTtl[idx]);
+                messages.add("Perimeter total mismatch.  Got: " + curTtl + ", expected: " + testData.expectedTtl[idx]);
             }
-            board.commitBoardState();
+            testData.board.commitBoardState();
         }
 
         title += ": " + (success ? "SUCCESS" : "FAILED");
-        refreshGameboardDisplay(board.getDomList(EdgeLocation.WEST), board.getDomList(EdgeLocation.NORTH), board.getPivotDom(), curTtl, title);
+        refreshGameboardDisplay(testData.board.getDomList(EdgeLocation.WEST), testData.board.getDomList(EdgeLocation.NORTH), testData.board.getPivotDom(), curTtl, title);
 
         return success;
     }
@@ -1568,6 +1580,33 @@ public class FunctionalTesting {
 
             title = TEST_NAME + ": " + (success ? "SUCCESS" : "FAILED");
             test.refreshGameboardDisplay(row, col, board.getPivotDom(), board.getPerimTotal(), title);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            DominoMultiPlayerGameBoard board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
+            Domino curDom[]            = new Domino[]       {new Domino(5, 5)  , new Domino(5, 0)  , new Domino(6, 0)  , new Domino(5, 3)  , new Domino(3, 6)  , new Domino(5, 2)  ,
+                                                             new Domino(6, 2)  , new Domino(5, 6)  , new Domino(6, 6)  , new Domino(6, 1)  , new Domino(1, 4)  , new Domino(6, 4)  };
+            EdgeLocation addLocation[] = new EdgeLocation[] {EdgeLocation.WEST , EdgeLocation.WEST , EdgeLocation.WEST , EdgeLocation.EAST , EdgeLocation.EAST , EdgeLocation.NORTH,
+                                                             EdgeLocation.NORTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH};
+            int expectedTtl[]          = new int[]          {                10,                 10,                 16,                  9,                 12,                 14,
+                                                                             18,                 24,                 30,                 19,                 22,                 24};
+            boolean expectedSuc[]      = new boolean[]      {              true,               true,               true,               true,               true,               true,
+                                                                           true,               true,               true,               true,               true,               true};
+            ArrayList<String> messages = new ArrayList<String>();
+            final String TEST_NAME = "DominoGameBoard: Lock the board with one domino type";
+
+            //Case: Add dominos to the board and lock the board
+            success = test.testAddDominoes(curDom, expectedTtl, expectedSuc, board, addLocation, messages, TEST_NAME);
+
+            if(!board.isLocked()) {
+                success = false;
+                messages.add("Expected board locked, but board does not show locked.");
+            }
+            
+            logSuccess(success, TEST_NAME, messages, test.mPassFailCtr);
 
             return success;
         }},

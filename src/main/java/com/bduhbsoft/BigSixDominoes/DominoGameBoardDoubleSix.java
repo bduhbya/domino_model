@@ -2,6 +2,8 @@ package com.bduhbsoft.BigSixDominoes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
@@ -18,11 +20,8 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
 
     private static final String TAG = CHILD_TAG = "DominoGameBoardDoubleSix";
     private static final int BAD_IDX = -1;
-
-    //The board only consists of one row and one column.  ArrayList provides
-    //enough flexability to conisder the start and end of the arrays as the
-    //edged of the board.  The spinner denotes the intersection of the row
-    //and column
+    private static final int MAX_DOM_COUNT = 7; //Max of domino types
+    private static final int MIN_DOM_TYPE = 0; //Min domino types
 
     //For the row:      WEST        EAST
     //                 mRow[0] ... mRow[N]
@@ -34,7 +33,8 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
     private Domino mSpinner;
 
     //Internal tracking variables
-    private boolean            mSpinnerFlanked;
+    private boolean  mSpinnerFlanked;
+    private int[]    mTypeCount; //Tracks number of each domino type played
 
     //**************************Public Interface*****************************
 
@@ -43,6 +43,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         mRow = mColumn = null;
         mSpinner = null;
         mSpinnerFlanked = false;
+        initTypeCounts();
         Logging.LogMsg(LogLevel.TRACE, TAG, "Constructor");
     }
 
@@ -81,10 +82,13 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         }
     }
 
-    /**
-     * Commits the last domino played on the board.  Cannot be undone.
-     */
     public void commitBoardState() {
+        if(mLastDom != null) {
+            //Update count of domino types and check if board is now locked
+            mTypeCount[mLastDom.getSide1()] += 1;
+            mTypeCount[mLastDom.getSide2()] += 1;
+            updateBoardLocked();
+        }
         mBoardOpen = true;
         mLastDom = null;
     }
@@ -215,15 +219,6 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         }
     }
 
-    /**
-     * Returns the current spinner
-     * <p>
-     * @return Domino : Board spinner
-     */
-    public Domino getSpinner() {
-        return mSpinner;
-    }
-
     public Domino getPivotDom() {
         return mSpinner;
     }
@@ -243,7 +238,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         curDom = mRow.get(eastIdx);
         Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for east domino: " + curDom + ", orientation: " +
                        curDom.getOrientation() + ", index: " + eastIdx);
-        eastVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.EAST);
+        eastVal = getEdgeTotal(curDom, curDom.getOrientation(), EdgeLocation.EAST);
         Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got east value: " + eastVal);
 
         //If there is only one domino and it is NOT a double, we need the other side to add
@@ -252,7 +247,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         if((westIdx == eastIdx && !curDom.isDouble()) ||
            (westIdx != eastIdx                      )   ) {
             curDom = mRow.get(westIdx);
-            westVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.WEST);
+            westVal = getEdgeTotal(curDom, curDom.getOrientation(), EdgeLocation.WEST);
             Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, getting value for west domino: " + curDom + ", orientation: " +
                            curDom.getOrientation() + ", index: " + westIdx);
             Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got west value: " + westVal);
@@ -265,7 +260,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         if(northIdx != BAD_IDX) {
             curDom = mColumn.get(northIdx);
             if(curDom != mSpinner) {
-                northVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.NORTH);
+                northVal = getEdgeTotal(curDom, curDom.getOrientation(), EdgeLocation.NORTH);
                 Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got north value: " + northVal);
             }
         }
@@ -274,7 +269,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         if(southIdx != BAD_IDX) {
             curDom = mColumn.get(southIdx);
             if(curDom != mSpinner) {
-                southVal = getEdgeVal(curDom, curDom.getOrientation(), EdgeLocation.SOUTH);
+                southVal = getEdgeTotal(curDom, curDom.getOrientation(), EdgeLocation.SOUTH);
                 Logging.LogMsg(LogLevel.TRACE, TAG, "getPerimTotal, got south value: " + southVal);
             }
         }
@@ -283,6 +278,32 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
     }
 
     //********************************Private Functions*********************************
+    private void updateBoardLocked() {
+        //If the all the dominoes matching the edge values are on the board, it is locked
+        int value;
+        Set<Integer> edgeTypes = new HashSet<>();
+        for(EdgeLocation loc : EdgeLocation.values()) {
+            value = getEdgeVal(loc);
+            if(value >= MIN_DOM_TYPE && value < MAX_DOM_COUNT)
+                edgeTypes.add(value);
+        }
+
+        mIsLocked = true;
+        for(int type : edgeTypes) {
+            if(mTypeCount[type] < MAX_DOM_COUNT) {
+                mIsLocked = false;
+                break;
+            }
+        }
+    }
+
+    private void initTypeCounts() {
+        mTypeCount = new int[MAX_DOM_COUNT];
+
+        for(int curType = 0; curType < MAX_DOM_COUNT; curType++)
+            mTypeCount[curType] = 0;
+    }
+
     private int getSpinnerRow() {
         return getSpinnerIdx(mRow);
     }
@@ -355,6 +376,41 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         return mColumn.size() - 1;
     }
 
+    private int getEdgeVal(EdgeLocation loc) {
+        int idx = BAD_IDX;
+        Domino curDom;
+        ArrayList<Domino> curList = null;
+        switch(loc) {
+            case NORTH:
+                idx = getNorthIdx();
+                curList = mColumn;
+                break;
+            case SOUTH:
+                idx = getSouthIdx();
+                curList = mColumn;
+                break;
+            case EAST:
+                idx = getEastIdx();
+                curList = mRow;
+                break;
+            case WEST:
+                idx = getWestIdx();
+                curList = mRow;
+                break;
+            default:
+                idx = -1;
+        }
+
+        if(idx == BAD_IDX)
+            return -1;
+
+        curDom = curList.get(idx);
+        if(curDom == mSpinner)
+            return mSpinner.getSide1();
+
+        return getEdgeTotal(curDom, curDom.getOrientation(), loc);
+    }
+
     private void updatedSpinnerFlanked() {
         int spinnerRowIdx = getSpinnerRow();
 
@@ -381,7 +437,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         addDomino(theDomino, mRow, rowIdx);
     }
 
-    boolean checkMatch(Domino newDom, Domino boardDom, Orientation targetOrtn) {
+    private boolean checkMatch(Domino newDom, Domino boardDom, Orientation targetOrtn) {
         boolean success = false;
         int curSide = 0;
         boolean matchSd1 = false;
@@ -470,7 +526,9 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         return list.indexOf(mSpinner);
     }
 
-    private int getEdgeVal(Domino curDom, Orientation ortn, EdgeLocation edge) {
+    //Gets the total of a single edge.  Total may be the exposed side, or for the double the
+    //the sum of the two sides
+    private int getEdgeTotal(Domino curDom, Orientation ortn, EdgeLocation edge) {
         int retVal = 0;
         if(curDom.isDouble()) {
             return curDom.getSide1() + curDom.getSide2();
