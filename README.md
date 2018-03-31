@@ -11,3 +11,13 @@ Code here is intended to flesh out the basic mechanics of:
 - Drawing the basic bone yard
 - Saving a game
 - Having players make a play
+
+# Building
+
+If using Windows(shame on you), install Git bash, cygwin or a Linux virtual machine.
+
+If using Git bash, install wget from
+https://eternallybored.org/misc/wget/releases/wget-1.19.4-win64.zip and copy binary
+contents to C:\Program Files\Git\mingw64\bin
+
+Run the script build-me.sh

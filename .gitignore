@@ -1,2 +1,4 @@
 *.swp
 *.class
+hamcrest*.jar
+junit*.jar
