@@ -20,8 +20,12 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
 
     private static final String TAG = CHILD_TAG = "DominoGameBoardDoubleSix";
     private static final int BAD_IDX = -1;
+    private static final int NO_DOMINO = -1;
     private static final int MAX_DOM_COUNT = 7; //Max of domino types
     private static final int MIN_DOM_TYPE = 0; //Min domino types
+
+    //Dominoes on the board are modelled by row and column array.  The
+    //spinner is the interection of the arrays
 
     //For the row:      WEST        EAST
     //                 mRow[0] ... mRow[N]
@@ -38,6 +42,8 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
 
     //**************************Public Interface*****************************
 
+    //Functions implemented from super class are no documented since they are
+    //documented in the super class
     public DominoGameBoardDoubleSix() {
         super();
         mRow = mColumn = null;
@@ -47,9 +53,6 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         Logging.LogMsg(LogLevel.TRACE, TAG, "Constructor");
     }
 
-    /**
-    * Removes last uncommitted domino from the game board
-    */
     public void removeLast() {
         if(!mBoardOpen) {
             if(mRow != null) {
@@ -85,8 +88,9 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
     public void commitBoardState() {
         if(mLastDom != null) {
             //Update count of domino types and check if board is now locked
+            //A double is only counted once
             mTypeCount[mLastDom.getSide1()] += 1;
-            mTypeCount[mLastDom.getSide2()] += 1;
+            if (!mLastDom.isDouble()) mTypeCount[mLastDom.getSide2()] += 1;
             updateBoardLocked();
         }
         mBoardOpen = true;
@@ -203,7 +207,6 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         return success;
     }
 
-    //TODO: Throw exception
     public List<Domino> getDomList(EdgeLocation location) {
         switch(location) {
             case NORTH:
@@ -215,7 +218,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
                 return mRow;
 
             default:
-                return null; //TODO: Throw exception
+                throw new IllegalArgumentException("Unsupported edge location: " + location.name());
         }
     }
 
@@ -229,7 +232,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         Domino curDom;
 
         eastIdx = getEastIdx();
-        //THe row is ALWAYS created and if it doesn't exist, the board should be empty
+        //The row is ALWAYS created and if it doesn't exist, the board should be empty
         if(eastIdx == BAD_IDX) {
             return 0;
         }
@@ -376,6 +379,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         return mColumn.size() - 1;
     }
 
+    //Get the value of domino at the specified edge location
     private int getEdgeVal(EdgeLocation loc) {
         int idx = BAD_IDX;
         Domino curDom;
@@ -398,16 +402,18 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
                 curList = mRow;
                 break;
             default:
-                idx = -1;
+                idx = BAD_IDX;
         }
 
         if(idx == BAD_IDX)
-            return -1;
+            return NO_DOMINO;
 
         curDom = curList.get(idx);
-        if(curDom == mSpinner)
+        if(curDom.isDouble())
             return mSpinner.getSide1();
 
+        //Get the total for the edge if not a double.  We use this to ensure we
+        //return the correct side of the domino
         return getEdgeTotal(curDom, curDom.getOrientation(), loc);
     }
 
@@ -437,6 +443,7 @@ public class DominoGameBoardDoubleSix extends DominoMultiPlayerGameBoard {
         addDomino(theDomino, mRow, rowIdx);
     }
 
+    //Checks if the newDom matches the domino on the board location
     private boolean checkMatch(Domino newDom, Domino boardDom, Orientation targetOrtn) {
         boolean success = false;
         int curSide = 0;

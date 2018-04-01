@@ -119,6 +119,8 @@ public abstract class DominoMultiPlayerGameBoard implements Serializable {
      * 
      * @param location Edge location to get list of dominoes
      * @return List of dominoes for the corresponding edge location
+     *
+     * @throws IllegalArgumentException if edge location is not supported
      */
     public abstract List<Domino> getDomList(EdgeLocation location);
 
