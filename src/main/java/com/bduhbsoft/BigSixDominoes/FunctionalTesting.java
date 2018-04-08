@@ -1589,12 +1589,44 @@ public class FunctionalTesting {
                                                    new Domino(6, 2)  , new Domino(5, 6)  , new Domino(6, 6)  , new Domino(6, 1)  , new Domino(1, 4)  , new Domino(6, 4)  };
             data.addLocation = new EdgeLocation[] {EdgeLocation.WEST , EdgeLocation.WEST , EdgeLocation.WEST , EdgeLocation.EAST , EdgeLocation.EAST , EdgeLocation.NORTH,
                                                    EdgeLocation.NORTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH, EdgeLocation.SOUTH};
-            data.expectedTt  = new int[]          {                10,                 10,                 16,                  9,                 12,                 14,
+            data.expectedTtl = new int[]          {                10,                 10,                 16,                  9,                 12,                 14,
                                                                    18,                 24,                 30,                 19,                 22,                 24};
             data.expectedSuc = new boolean[]      {              true,               true,               true,               true,               true,               true,
                                                                  true,               true,               true,               true,               true,               true};
             data.messages = new ArrayList<String>();
             data.testName = "DominoGameBoard: Lock the board with one domino type";
+
+            //Case: Add dominos to the board and lock the board
+            success = test.testAddDominoes(data);
+
+            if(!data.board.isLocked()) {
+                success = false;
+                data.messages.add("Expected board locked, but board does not show locked.");
+            }
+            
+            logSuccess(success, data.testName, data.messages, test.mPassFailCtr);
+
+            return success;
+        }},
+
+        new IFunctionalTest() { @Override public boolean runTest(FunctionalTesting test) {
+            boolean success = true, tempResult = false;
+            MultiPlayerBoardTestData data = new MultiPlayerBoardTestData();
+            data.board = MultiPlayerGameBoardFactory.getGameBoard(GameType.BigSix);
+            data.curDom      = new Domino[]       {new Domino(6, 6)  , new Domino(6, 5) , new Domino(6, 2) , new Domino(6, 4)  , new Domino(4, 2)  , new Domino(5, 2) ,
+                                                   new Domino(2, 2)  , new Domino(2, 0) , new Domino(6, 0) , new Domino(2, 1)  , new Domino(6, 1)  , new Domino(6, 3) ,
+                                                   new Domino(3, 2)};
+            data.addLocation = new EdgeLocation[] {EdgeLocation.NORTH, EdgeLocation.WEST, EdgeLocation.EAST, EdgeLocation.NORTH, EdgeLocation.NORTH, EdgeLocation.WEST,
+                                                   EdgeLocation.WEST , EdgeLocation.WEST, EdgeLocation.WEST, EdgeLocation.EAST , EdgeLocation.EAST , EdgeLocation.EAST,
+                                                   EdgeLocation.EAST};
+            data.expectedTtl = new int[]          {                12,                17,                 7,                 11,                  9,                 6,
+                                                                    8,                 4,                10,                  9,                 14,                11,
+                                                                   10};
+            data.expectedSuc = new boolean[]      {              true,              true,              true,               true,               true,              true,
+                                                                 true,              true,              true,               true,               true,              true,
+                                                                 true};
+            data.messages = new ArrayList<String>();
+            data.testName = "DominoGameBoard: Lock the board with two domino types";
 
             //Case: Add dominos to the board and lock the board
             success = test.testAddDominoes(data);
