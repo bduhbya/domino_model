@@ -15,11 +15,12 @@ import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 public abstract class DominoMultiPlayerGameBoard implements Serializable {
 
     //Internal tracking variables
-    protected boolean           mIsEmpty;
+    protected boolean mIsEmpty;
+    protected boolean mIsLocked;
     //If the last domino was not committed or removed, the board is not open to accept
     //another domino
-    protected boolean           mBoardOpen;
-    protected Domino            mLastDom;
+    protected boolean mBoardOpen;
+    protected Domino  mLastDom;
 
     protected static String CHILD_TAG; //Set by extending class so that shared logging is easliy understood
 
@@ -118,6 +119,8 @@ public abstract class DominoMultiPlayerGameBoard implements Serializable {
      * 
      * @param location Edge location to get list of dominoes
      * @return List of dominoes for the corresponding edge location
+     *
+     * @throws IllegalArgumentException if edge location is not supported
      */
     public abstract List<Domino> getDomList(EdgeLocation location);
 
@@ -144,4 +147,14 @@ public abstract class DominoMultiPlayerGameBoard implements Serializable {
      * @return Current perimeter value
      */
     public abstract int getPerimTotal();
+
+    /**
+     * Returns if the board is locked.  When the board is locked, it cannot be
+     * played on anymore and based on the game type appropriate action is needed.
+     * <p>
+     * @return True is board is locked
+     */
+    public boolean isLocked() {
+        return mIsLocked;
+    }
 }
