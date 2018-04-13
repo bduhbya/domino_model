@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /*
-* Class Dominoe
+* Class Domino
 *
-* Defines a Dominoe
+* Defines a Domino
 */
 
 public class Domino implements Serializable {
@@ -38,7 +38,7 @@ public class Domino implements Serializable {
     //Public helpers
     public static int NUM_DLB_SIX_DOMINOES = 28;
 
-    public static ArrayList<Domino> getDominoeSet(SetType setType) {
+    public static ArrayList<Domino> getDominoSet(SetType setType) {
         //TODO: case statement
         return getDoubleSixSet();
     }

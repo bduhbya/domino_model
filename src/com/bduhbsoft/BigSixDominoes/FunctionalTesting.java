@@ -5,21 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
-import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 import com.bduhbsoft.BigSixDominoes.Logging.LogLevel;
 import com.bduhbsoft.BigSixDominoes.Domino.SetType;
-import com.bduhbsoft.BigSixDominoes.Domino.Orientation;
 import com.bduhbsoft.BigSixDominoes.DominoMultiPlayerGameBoard.EdgeLocation;
-import com.bduhbsoft.BigSixDominoes.ScoreCardHouse;
 import com.bduhbsoft.BigSixDominoes.ScoreCardHouse.QuadState;
-import com.bduhbsoft.BigSixDominoes.MultiPlayerGameBoardFactory;
 import com.bduhbsoft.BigSixDominoes.MultiPlayerGameBoardFactory.GameType;
 
 /*
@@ -495,7 +490,7 @@ public class FunctionalTesting {
         int[] passFailCtr = new int[PASS_FAIL_CNDS];
         int yardSize, newYardSize;
         Domino tempDom1, tempDom2;
-        ArrayList<Domino> domSet = Domino.getDominoeSet(SetType.DOUBLE_SIX);
+        ArrayList<Domino> domSet = Domino.getDominoSet(SetType.DOUBLE_SIX);
         DominoBoneyard yard = new DominoBoneyard();
         ArrayList<Domino> copyList;
         ArrayList<String> messages = new ArrayList<String>();
@@ -713,11 +708,11 @@ public class FunctionalTesting {
             final String TEST_NAME = "Dominoe: Get set of type " + SetType.DOUBLE_SIX;
 
             //Case get dominoe set
-            domSet = Domino.getDominoeSet(SetType.DOUBLE_SIX);
+            domSet = Domino.getDominoSet(SetType.DOUBLE_SIX);
 
             if(domSet == null) {
                 success = false;
-                messages.add("Function getDominoeSet returned null");
+                messages.add("Function getDominoSet returned null");
             }
 
             //TODO: Lookup clever java way to validate all dominoes are present in set
