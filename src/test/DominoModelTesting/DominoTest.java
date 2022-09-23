@@ -53,6 +53,13 @@ public class DominoTest {
         );
     }
 
+    private static Domino referenceDomino = new Domino(2, 6);
+
+    private static boolean validateDominoSides(Domino one, Domino two) {
+        return (one.getSide1() == two.getSide1() && one.getSide2() == two.getSide2()) ||
+                (one.getSide2() == two.getSide1() && one.getSide1() == two.getSide2());
+    }
+
     @Before
     public void setUp() throws Exception {
     }
@@ -62,41 +69,29 @@ public class DominoTest {
     }
 
     @Test
-    public void getDominoSetDoubleSix() {
+    public void getDominoSetDoubleSix_Success() {
         List<Domino> dblSixSet = Domino.getDominoSet(Domino.SetType.DOUBLE_SIX);
         int numDominoes = dominoSets.get(Domino.SetType.DOUBLE_SIX).size();
         for (int idx = 0; idx < numDominoes; ++idx) {
             Domino expected = dominoSets.get(Domino.SetType.DOUBLE_SIX).get(idx);
             Domino actual = dblSixSet.get(idx);
-            assertTrue(String.format("Expected Domino: %s matches actial Domino: %s", expected.toString(), actual.toString()), expected.equals(actual));
+            assertTrue(String.format("Expected Domino: %s matches actual Domino: %s", expected.toString(), actual.toString()), expected.equals(actual));
         }
     }
 
     @Test
-    public void getSide1() {
+    public void createDomino_Success() {
+        Domino testDomino = new Domino(referenceDomino.getSide1(), referenceDomino.getSide2());
+        assertTrue(String.format("Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
+                referenceDomino.toString(), testDomino.toString()), validateDominoSides(testDomino, referenceDomino));
     }
 
     @Test
-    public void getSide2() {
+    public void isDouble_Success() {
     }
 
     @Test
-    public void getDomSide1() {
+    public void getOrientation_Success() {
     }
 
-    @Test
-    public void getDomSide2() {
-    }
-
-    @Test
-    public void isDouble() {
-    }
-
-    @Test
-    public void getOrientation() {
-    }
-
-    @Test
-    public void setOrientation() {
-    }
 }
