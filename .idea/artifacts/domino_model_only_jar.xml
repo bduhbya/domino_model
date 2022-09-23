@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="domino-model-only:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/domino_model_only_jar</output-path>
+    <root id="archive" name="domino-model-only.jar">
+      <element id="module-output" name="domino-model-only" />
+    </root>
+  </artifact>
+</component>
