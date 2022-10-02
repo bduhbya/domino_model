@@ -4,7 +4,6 @@ import com.bduhbsoft.BigSixDominoes.Domino;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import sun.plugin.dom.DOMObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,9 +54,16 @@ public class DominoTest {
 
     private static Domino referenceDomino = new Domino(2, 6);
 
-    private static boolean validateDominoSides(Domino one, Domino two) {
+    private static boolean validateDominoSidesRaw(Domino one, Domino two) {
         return (one.getSide1() == two.getSide1() && one.getSide2() == two.getSide2()) ||
                 (one.getSide2() == two.getSide1() && one.getSide1() == two.getSide2());
+    }
+
+    private static boolean validateDominoSidesInternalObject(Domino one, Domino two) {
+        return (one.getDomSide1().getValue() == two.getDomSide1().getValue() &&
+                one.getDomSide2().getValue() == two.getDomSide2().getValue()) ||
+                (one.getDomSide1().getValue() == two.getDomSide2().getValue() &&
+                one.getDomSide2().getValue() == two.getDomSide1().getValue());
     }
 
     @Before
@@ -82,8 +88,12 @@ public class DominoTest {
     @Test
     public void createDomino_Success() {
         Domino testDomino = new Domino(referenceDomino.getSide1(), referenceDomino.getSide2());
-        assertTrue(String.format("Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
-                referenceDomino.toString(), testDomino.toString()), validateDominoSides(testDomino, referenceDomino));
+        assertTrue(String.format("Comparing side values directly. Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
+                referenceDomino.toString(), testDomino), validateDominoSidesRaw(testDomino, referenceDomino));
+        assertTrue(String.format("Comparing with object equals. Expected Domino: %s matches actual Domino: %s",
+                referenceDomino.toString(), testDomino), referenceDomino.equals(testDomino));
+        assertTrue(String.format("Comparing with internal side object. Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
+                referenceDomino.toString(), testDomino), validateDominoSidesInternalObject(testDomino, referenceDomino));
     }
 
     @Test
