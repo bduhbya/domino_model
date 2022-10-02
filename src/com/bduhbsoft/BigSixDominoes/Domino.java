@@ -92,6 +92,13 @@ public class Domino implements Serializable {
         setSidesOrientaion(Orientation.SIDE1_NORTH);
     }
 
+    public Domino(Domino domino) {
+        mSide1 = new DominoSide(domino.getSide1());
+        mSide2 = new DominoSide(domino.getSide2());
+        mIsDouble = mSide1.equals(mSide2);
+        setSidesOrientaion(Orientation.SIDE1_NORTH);
+    }
+
     public int getSide1() {
         return mSide1.getValue();
     }
