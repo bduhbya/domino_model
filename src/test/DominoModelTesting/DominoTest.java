@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class DominoTest {
 
-    private static Map<Domino.SetType, List<Domino>> dominoSets = null;
+    private static final Map<Domino.SetType, List<Domino>> dominoSets;
 
     static {
         dominoSets = new HashMap<>();
@@ -52,7 +52,7 @@ public class DominoTest {
         );
     }
 
-    private static Domino referenceDomino = new Domino(2, 6);
+    private static final Domino referenceDomino = new Domino(2, 6);
 
     private static boolean validateDominoSidesRaw(Domino one, Domino two) {
         return (one.getSide1() == two.getSide1() && one.getSide2() == two.getSide2()) ||
@@ -78,6 +78,8 @@ public class DominoTest {
     public void getDominoSetDoubleSix_Success() {
         List<Domino> dblSixSet = Domino.getDominoSet(Domino.SetType.DOUBLE_SIX);
         int numDominoes = dominoSets.get(Domino.SetType.DOUBLE_SIX).size();
+        assertTrue(String.format("Expected Domino count: %s matches actual Domino count: %s",
+                numDominoes, dblSixSet.size()), numDominoes == dblSixSet.size());
         for (int idx = 0; idx < numDominoes; ++idx) {
             Domino expected = dominoSets.get(Domino.SetType.DOUBLE_SIX).get(idx);
             Domino actual = dblSixSet.get(idx);
@@ -89,11 +91,11 @@ public class DominoTest {
     public void createDomino_Success() {
         Domino testDomino = new Domino(referenceDomino.getSide1(), referenceDomino.getSide2());
         assertTrue(String.format("Comparing side values directly. Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
-                referenceDomino.toString(), testDomino), validateDominoSidesRaw(testDomino, referenceDomino));
+                referenceDomino, testDomino), validateDominoSidesRaw(testDomino, referenceDomino));
         assertTrue(String.format("Comparing with object equals. Expected Domino: %s matches actual Domino: %s",
-                referenceDomino.toString(), testDomino), referenceDomino.equals(testDomino));
+                referenceDomino, testDomino), referenceDomino.equals(testDomino));
         assertTrue(String.format("Comparing with internal side object. Expected: Side values should be equivalent. Reference Domino: %s, created Domino: %s",
-                referenceDomino.toString(), testDomino), validateDominoSidesInternalObject(testDomino, referenceDomino));
+                referenceDomino, testDomino), validateDominoSidesInternalObject(testDomino, referenceDomino));
     }
 
     @Test
