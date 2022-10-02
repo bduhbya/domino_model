@@ -124,6 +124,11 @@ public class DominoTest {
 
     @Test
     public void getOrientation_Success() {
+        final Domino.Orientation orientation = Domino.Orientation.SIDE1_WEST;
+        Domino testDomino = new Domino(referenceDomino);
+        testDomino.setOrientation(orientation);
+        assertSame(String.format("Expected Orientation: %s matches actual Orientation: %s",
+                orientation, testDomino.getOrientation()), orientation, testDomino.getOrientation());
     }
 
 }
