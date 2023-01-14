@@ -88,13 +88,16 @@ public class Domino implements Serializable {
     public Domino(int side1, int side2) {
         mSide1 = new DominoSide(side1);
         mSide2 = new DominoSide(side2);
-        mIsDouble = mSide1.equals(mSide2);
-        setSidesOrientaion(Orientation.SIDE1_NORTH);
+        commonInitialization();
     }
 
     public Domino(Domino domino) {
         mSide1 = new DominoSide(domino.getSide1());
         mSide2 = new DominoSide(domino.getSide2());
+        commonInitialization();
+    }
+
+    private void commonInitialization() {
         mIsDouble = mSide1.equals(mSide2);
         setSidesOrientaion(Orientation.SIDE1_NORTH);
     }
